@@ -29,7 +29,7 @@ export default {
       keyframes: {
         bounceIn: {
           '0%': { transform: 'scale(0.8)', opacity: '0' },
-          '60%': { transform: 'scale(1.1)' },
+          '60%': { transform: 'scale(1.1)', opacity: '1' },
           '100%': { transform: 'scale(1)', opacity: '1' },
         },
         shake: {
