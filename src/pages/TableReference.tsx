@@ -96,14 +96,21 @@ export default function TableReference({ onNavigate }: Props) {
         </div>
       </div>
 
-      {/* Practice button */}
-      <div className="relative z-10 w-full max-w-md pb-4">
+      {/* Practice buttons */}
+      <div className="relative z-10 w-full max-w-md pb-4 flex gap-3">
+        <button
+          onClick={() => onNavigate({ name: 'practice-session', table: selected, mode: 'free', ordered: true })}
+          className="flex-1 h-16 bg-teal-400 text-white rounded-2xl border-b-4 border-teal-600
+            text-lg font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
+        >
+          🔢 En orden
+        </button>
         <button
           onClick={() => onNavigate({ name: 'practice-session', table: selected, mode: 'free' })}
-          className="w-full h-16 bg-magic-purple text-white rounded-2xl border-b-4 border-purple-800
-            text-xl font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
+          className="flex-1 h-16 bg-magic-purple text-white rounded-2xl border-b-4 border-purple-800
+            text-lg font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
         >
-          🎯 ¡Practicar la tabla del {selected}!
+          🔀 Aleatorio
         </button>
       </div>
     </div>

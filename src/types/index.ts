@@ -38,7 +38,7 @@ export type Screen =
   | { name: 'home' }
   | { name: 'free-mode' }
   | { name: 'progressive-mode' }
-  | { name: 'practice-session'; table: number; mode: 'free' | 'progressive' }
+  | { name: 'practice-session'; table: number; mode: 'free' | 'progressive'; ordered?: boolean }
   | { name: 'session-results'; table: number; correct: number; mode: 'free' | 'progressive' }
   | { name: 'unicorn-customizer' }
   | { name: 'table-reference' };

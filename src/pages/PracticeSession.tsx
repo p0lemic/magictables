@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Screen, SessionQuestion } from '../types'
 import { useGameStore } from '../store/gameStore'
-import { generateSession, generateWrongOptions } from '../utils/game'
+import { generateSession, generateOrderedSession, generateWrongOptions } from '../utils/game'
 import { useSound } from '../hooks/useSound'
 import MultipleChoiceInput from '../components/MultipleChoiceInput'
 import NumericKeyboard from '../components/NumericKeyboard'
@@ -10,6 +10,7 @@ import StarParticles from '../components/StarParticles'
 interface Props {
   table: number
   mode: 'free' | 'progressive'
+  ordered?: boolean
   onNavigate: (screen: Screen) => void
 }
 
@@ -25,11 +26,13 @@ function shuffleOptions(correct: number): number[] {
   return all
 }
 
-export default function PracticeSession({ table, mode, onNavigate }: Props) {
+export default function PracticeSession({ table, mode, ordered = false, onNavigate }: Props) {
   const { tables } = useGameStore()
   const sound = useSound()
 
-  const [questions] = useState<SessionQuestion[]>(() => generateSession(table))
+  const [questions] = useState<SessionQuestion[]>(() =>
+    ordered ? generateOrderedSession(table) : generateSession(table)
+  )
   const [current, setCurrent] = useState(0)
   const [correct, setCorrect] = useState(0)
   const [feedback, setFeedback] = useState<FeedbackState>('none')

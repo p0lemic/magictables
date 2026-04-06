@@ -52,6 +52,15 @@ export function generateSession(tableNumber: number): SessionQuestion[] {
   return questions
 }
 
+/** Generate an ordered 10-question session: tableNumber×1, ×2, … ×10. */
+export function generateOrderedSession(tableNumber: number): SessionQuestion[] {
+  return Array.from({ length: 10 }, (_, i) => ({
+    a: tableNumber,
+    b: i + 1,
+    answer: tableNumber * (i + 1),
+  }))
+}
+
 /** Generate 3 distinct wrong answer options for a multiple-choice question. */
 export function generateWrongOptions(correct: number): number[] {
   const offsets = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, -1, -2, -3, -4, -5]

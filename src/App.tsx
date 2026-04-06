@@ -28,6 +28,7 @@ export default function App() {
         <PracticeSession
           table={screen.table}
           mode={screen.mode}
+          ordered={screen.ordered}
           onNavigate={navigate}
         />
       )

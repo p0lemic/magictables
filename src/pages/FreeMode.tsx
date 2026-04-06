@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Screen } from '../types'
 import { useGameStore } from '../store/gameStore'
 import StarRating from '../components/StarRating'
@@ -9,6 +10,7 @@ interface Props {
 
 export default function FreeMode({ onNavigate }: Props) {
   const { tables } = useGameStore()
+  const [ordered, setOrdered] = useState(false)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-magic-lavender to-magic-rose flex flex-col items-center gap-6 p-6 font-nunito relative overflow-hidden">
@@ -26,6 +28,24 @@ export default function FreeMode({ onNavigate }: Props) {
         <h2 className="text-3xl font-black text-magic-purple">Práctica libre</h2>
       </div>
 
+      {/* Mode toggle */}
+      <div className="relative z-10 flex bg-white rounded-2xl border-2 border-magic-purple p-1 gap-1 w-full max-w-md">
+        <button
+          onClick={() => setOrdered(false)}
+          className={`flex-1 h-11 rounded-xl text-base font-black transition-all
+            ${!ordered ? 'bg-magic-purple text-white shadow' : 'text-magic-purple'}`}
+        >
+          🔀 Aleatorio
+        </button>
+        <button
+          onClick={() => setOrdered(true)}
+          className={`flex-1 h-11 rounded-xl text-base font-black transition-all
+            ${ordered ? 'bg-magic-purple text-white shadow' : 'text-magic-purple'}`}
+        >
+          🔢 En orden
+        </button>
+      </div>
+
       <p className="relative z-10 text-lg font-bold text-pink-500 -mt-2">
         ¿Qué tabla quieres practicar?
       </p>
@@ -38,7 +58,7 @@ export default function FreeMode({ onNavigate }: Props) {
           return (
             <button
               key={n}
-              onClick={() => onNavigate({ name: 'practice-session', table: n, mode: 'free' })}
+              onClick={() => onNavigate({ name: 'practice-session', table: n, mode: 'free', ordered })}
               className="bg-white rounded-2xl border-2 border-b-4 border-magic-purple p-4
                 flex flex-col items-center gap-2 shadow-md
                 active:scale-95 active:border-b-2 transition-all"
