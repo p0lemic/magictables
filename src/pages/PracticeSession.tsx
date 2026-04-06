@@ -34,7 +34,7 @@ export default function PracticeSession({ table, mode, onNavigate }: Props) {
   const [correct, setCorrect] = useState(0)
   const [feedback, setFeedback] = useState<FeedbackState>('none')
   const [options] = useState<number[][]>(() =>
-    generateSession(table).map(q => shuffleOptions(q.answer))
+    questions.map(q => shuffleOptions(q.answer))
   )
 
   const mastery = tables[table]?.masteryPercent ?? 0
