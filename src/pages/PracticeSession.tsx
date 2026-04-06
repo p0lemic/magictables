@@ -1,10 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import type { Screen, SessionQuestion } from '../types'
-import { useGameStore } from '../store/gameStore'
 import { generateSession, generateOrderedSession, generateWrongOptions } from '../utils/game'
 import { useSound } from '../hooks/useSound'
 import MultipleChoiceInput from '../components/MultipleChoiceInput'
-import NumericKeyboard from '../components/NumericKeyboard'
 import StarParticles from '../components/StarParticles'
 
 interface Props {
@@ -27,7 +25,6 @@ function shuffleOptions(correct: number): number[] {
 }
 
 export default function PracticeSession({ table, mode, ordered = false, onNavigate }: Props) {
-  const { tables } = useGameStore()
   const sound = useSound()
 
   const [questions] = useState<SessionQuestion[]>(() =>
@@ -40,8 +37,6 @@ export default function PracticeSession({ table, mode, ordered = false, onNaviga
     questions.map(q => shuffleOptions(q.answer))
   )
 
-  const mastery = tables[table]?.masteryPercent ?? 0
-  const useKeyboard = mastery >= 80
   const q: SessionQuestion = questions[current]
 
   // Enable sound on first render (user is already interacting)
@@ -126,14 +121,11 @@ export default function PracticeSession({ table, mode, ordered = false, onNaviga
 
       {/* Input */}
       <div className="relative z-10 w-full flex justify-center">
-        {useKeyboard
-          ? <NumericKeyboard onAnswer={handleAnswer} disabled={feedback !== 'none'} />
-          : <MultipleChoiceInput
-              options={options[current]}
-              onAnswer={handleAnswer}
-              disabled={feedback !== 'none'}
-            />
-        }
+        <MultipleChoiceInput
+          options={options[current]}
+          onAnswer={handleAnswer}
+          disabled={feedback !== 'none'}
+        />
       </div>
 
       {/* Score so far */}
