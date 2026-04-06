@@ -75,8 +75,17 @@ export default function PracticeSession({ table, mode, onNavigate }: Props) {
 
       {/* Progress bar */}
       <div className="relative z-10 w-full max-w-md">
-        <div className="flex justify-between text-sm font-bold text-magic-purple mb-1">
-          <span>Tabla del {table}</span>
+        <div className="flex justify-between items-center text-sm font-bold text-magic-purple mb-1">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onNavigate(mode === 'free' ? { name: 'free-mode' } : { name: 'progressive-mode' })}
+              className="w-8 h-8 bg-white rounded-lg border-2 border-b-4 border-magic-purple
+                text-base active:scale-95 transition-all shadow-sm flex items-center justify-center"
+            >
+              ←
+            </button>
+            <span>Tabla del {table}</span>
+          </div>
           <span>{current + 1} / 10</span>
         </div>
         <div className="h-4 bg-white/60 rounded-full overflow-hidden border border-magic-purple/30">
