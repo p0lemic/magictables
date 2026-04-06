@@ -6,6 +6,7 @@ import ProgressiveMode from './pages/ProgressiveMode'
 import PracticeSession from './pages/PracticeSession'
 import SessionResults from './pages/SessionResults'
 import UnicornCustomizer from './pages/UnicornCustomizer'
+import TableReference from './pages/TableReference'
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>({ name: 'home' })
@@ -43,5 +44,8 @@ export default function App() {
 
     case 'unicorn-customizer':
       return <UnicornCustomizer onNavigate={navigate} />
+
+    case 'table-reference':
+      return <TableReference onNavigate={navigate} />
   }
 }

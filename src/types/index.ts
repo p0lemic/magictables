@@ -40,7 +40,8 @@ export type Screen =
   | { name: 'progressive-mode' }
   | { name: 'practice-session'; table: number; mode: 'free' | 'progressive' }
   | { name: 'session-results'; table: number; correct: number; mode: 'free' | 'progressive' }
-  | { name: 'unicorn-customizer' };
+  | { name: 'unicorn-customizer' }
+  | { name: 'table-reference' };
 
 export const UNICORN_COLOR_HEX: Record<UnicornColor, string> = {
   white:    '#FFFFFF',

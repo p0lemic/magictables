@@ -55,6 +55,14 @@ export default function Home({ onNavigate }: Props) {
         </button>
 
         <button
+          onClick={() => onNavigate({ name: 'table-reference' })}
+          className="w-full h-20 bg-teal-400 text-white rounded-2xl border-b-4 border-teal-600
+            text-2xl font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
+        >
+          📖 Ver tablas
+        </button>
+
+        <button
           onClick={() => onNavigate({ name: 'unicorn-customizer' })}
           className="w-full h-20 bg-amber-400 text-white rounded-2xl border-b-4 border-amber-600
             text-2xl font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
