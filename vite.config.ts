@@ -22,6 +22,11 @@ export default defineConfig({
       }
     })
   ],
+  server: {
+    proxy: {
+      '/api': 'http://api:3001',
+    },
+  },
   test: {
     globals: true,
     environment: 'jsdom',

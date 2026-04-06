@@ -19,11 +19,20 @@ export function computeUnlockedAccessories(
   const anyThreeStars = withThreeStars >= 1
 
   const unlocked: AccessoryId[] = []
-  if (withOneStarOrMore >= 1) unlocked.push('rainbow-horn')
-  if (anyThreeStars) unlocked.push('golden-wings')
-  if (withOneStarOrMore >= 5) unlocked.push('flower-crown')
+  if (withOneStarOrMore >= 1)  unlocked.push('rainbow-horn')
+  if (withOneStarOrMore >= 2)  unlocked.push('star-bow')
+  if (withOneStarOrMore >= 3)  unlocked.push('fairy-wings')
+  if (withOneStarOrMore >= 5)  unlocked.push('flower-crown')
+  if (withOneStarOrMore >= 7)  unlocked.push('magic-shoes')
+  if (withOneStarOrMore >= 10) unlocked.push('princess-crown')
+  if (anyThreeStars)           unlocked.push('golden-wings')
+  if (withTwoStarsOrMore >= 3) unlocked.push('sparkle-tail')
+  if (withTwoStarsOrMore >= 5) unlocked.push('crystal-horn')
+  if (withTwoStarsOrMore >= 7) unlocked.push('rainbow-mane')
   if (withTwoStarsOrMore >= 10) unlocked.push('magic-cape')
-  if (withThreeStars >= 10) unlocked.push('glitter-sparkle')
+  if (withThreeStars >= 3)     unlocked.push('diamond-crown')
+  if (withThreeStars >= 7)     unlocked.push('phoenix-wings')
+  if (withThreeStars >= 10)    unlocked.push('glitter-sparkle')
   return unlocked
 }
 

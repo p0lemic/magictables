@@ -5,9 +5,10 @@ import UnicornAvatar from '../components/UnicornAvatar'
 
 interface Props {
   onNavigate: (screen: Screen) => void
+  onLogout: () => void
 }
 
-export default function Home({ onNavigate }: Props) {
+export default function Home({ onNavigate, onLogout }: Props) {
   const { tables, unicorn } = useGameStore()
 
   const totalStars = Object.values(tables).reduce((sum, t) => sum + t.stars, 0)
@@ -17,11 +18,20 @@ export default function Home({ onNavigate }: Props) {
       <StarParticles />
 
       {/* Header */}
-      <div className="relative z-10 text-center">
-        <h1 className="text-5xl font-black text-magic-purple drop-shadow-sm">
-          Tablas Mágicas
-        </h1>
-        <p className="text-xl font-bold text-pink-500 mt-1">✨ Aprende con unicornios ✨</p>
+      <div className="relative z-10 w-full max-w-xs flex items-start justify-between">
+        <div>
+          <h1 className="text-5xl font-black text-magic-purple drop-shadow-sm">
+            Tablas Mágicas
+          </h1>
+          <p className="text-xl font-bold text-pink-500 mt-1">✨ Aprende con unicornios ✨</p>
+        </div>
+        <button
+          onClick={onLogout}
+          className="mt-1 px-3 py-2 bg-white/70 rounded-xl border border-magic-purple/30
+            text-xs font-bold text-magic-purple/70 active:scale-95 transition-all shadow-sm shrink-0"
+        >
+          🔀 Cambiar
+        </button>
       </div>
 
       {/* Unicorn */}

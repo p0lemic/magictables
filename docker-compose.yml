@@ -1,4 +1,23 @@
 services:
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+      - ./data:/app/data
+    command: node --watch index.js
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]
+      interval: 2s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
   app:
     image: node:20-alpine
     working_dir: /app
@@ -10,3 +29,6 @@ services:
       - /app/node_modules
     environment:
       - NODE_ENV=development
+    depends_on:
+      api:
+        condition: service_healthy

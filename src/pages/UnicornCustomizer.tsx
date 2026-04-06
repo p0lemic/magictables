@@ -15,10 +15,19 @@ const COLOR_LABEL: Record<UnicornColor, string> = {
 
 const ACCESSORIES: Array<{ id: AccessoryId; slot: keyof UnicornEquipped; emoji: string }> = [
   { id: 'rainbow-horn',    slot: 'horn',  emoji: '🌈' },
-  { id: 'golden-wings',   slot: 'wings', emoji: '🪽' },
-  { id: 'flower-crown',   slot: 'horn',  emoji: '🌸' },
-  { id: 'magic-cape',     slot: 'cape',  emoji: '🧣' },
-  { id: 'glitter-sparkle', slot: 'horn', emoji: '✨' },
+  { id: 'star-bow',        slot: 'horn',  emoji: '⭐' },
+  { id: 'fairy-wings',     slot: 'wings', emoji: '🧚' },
+  { id: 'flower-crown',    slot: 'horn',  emoji: '🌸' },
+  { id: 'magic-shoes',     slot: 'cape',  emoji: '👟' },
+  { id: 'princess-crown',  slot: 'horn',  emoji: '👑' },
+  { id: 'golden-wings',    slot: 'wings', emoji: '🪽' },
+  { id: 'sparkle-tail',    slot: 'cape',  emoji: '💫' },
+  { id: 'crystal-horn',    slot: 'horn',  emoji: '💎' },
+  { id: 'rainbow-mane',    slot: 'cape',  emoji: '🌊' },
+  { id: 'magic-cape',      slot: 'cape',  emoji: '🧣' },
+  { id: 'diamond-crown',   slot: 'horn',  emoji: '💍' },
+  { id: 'phoenix-wings',   slot: 'wings', emoji: '🔥' },
+  { id: 'glitter-sparkle', slot: 'horn',  emoji: '✨' },
 ]
 
 export default function UnicornCustomizer({ onNavigate }: Props) {

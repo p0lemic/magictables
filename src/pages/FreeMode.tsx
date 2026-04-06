@@ -1,7 +1,5 @@
 import { useState } from 'react'
 import type { Screen } from '../types'
-import { useGameStore } from '../store/gameStore'
-import StarRating from '../components/StarRating'
 import StarParticles from '../components/StarParticles'
 
 interface Props {
@@ -9,11 +7,11 @@ interface Props {
 }
 
 export default function FreeMode({ onNavigate }: Props) {
-  const { tables } = useGameStore()
   const [ordered, setOrdered] = useState(false)
+  const [difficulty, setDifficulty] = useState<'easy' | 'hard'>('easy')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-magic-lavender to-magic-rose flex flex-col items-center gap-6 p-6 font-nunito relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-magic-lavender to-magic-rose flex flex-col items-center gap-4 p-6 font-nunito relative overflow-hidden">
       <StarParticles />
 
       {/* Header */}
@@ -28,7 +26,7 @@ export default function FreeMode({ onNavigate }: Props) {
         <h2 className="text-3xl font-black text-magic-purple">Práctica libre</h2>
       </div>
 
-      {/* Mode toggle */}
+      {/* Order toggle */}
       <div className="relative z-10 flex bg-white rounded-2xl border-2 border-magic-purple p-1 gap-1 w-full max-w-md">
         <button
           onClick={() => setOrdered(false)}
@@ -46,7 +44,25 @@ export default function FreeMode({ onNavigate }: Props) {
         </button>
       </div>
 
-      <p className="relative z-10 text-lg font-bold text-pink-500 -mt-2">
+      {/* Difficulty toggle */}
+      <div className="relative z-10 flex bg-white rounded-2xl border-2 border-magic-purple p-1 gap-1 w-full max-w-md">
+        <button
+          onClick={() => setDifficulty('easy')}
+          className={`flex-1 h-11 rounded-xl text-base font-black transition-all
+            ${difficulty === 'easy' ? 'bg-teal-400 text-white shadow' : 'text-teal-600'}`}
+        >
+          ⭐ Fácil
+        </button>
+        <button
+          onClick={() => setDifficulty('hard')}
+          className={`flex-1 h-11 rounded-xl text-base font-black transition-all
+            ${difficulty === 'hard' ? 'bg-rose-500 text-white shadow' : 'text-rose-600'}`}
+        >
+          🔥 Difícil
+        </button>
+      </div>
+
+      <p className="relative z-10 text-lg font-bold text-pink-500">
         ¿Qué tabla quieres practicar?
       </p>
 
@@ -54,18 +70,16 @@ export default function FreeMode({ onNavigate }: Props) {
       <div className="relative z-10 grid grid-cols-2 gap-4 w-full max-w-md">
         {Array.from({ length: 10 }, (_, i) => {
           const n = i + 1
-          const progress = tables[n]
           return (
             <button
               key={n}
-              onClick={() => onNavigate({ name: 'practice-session', table: n, mode: 'free', ordered })}
+              onClick={() => onNavigate({ name: 'practice-session', table: n, mode: 'free', ordered, difficulty })}
               className="bg-white rounded-2xl border-2 border-b-4 border-magic-purple p-4
                 flex flex-col items-center gap-2 shadow-md
                 active:scale-95 active:border-b-2 transition-all"
             >
               <span className="text-4xl font-black text-magic-purple">×{n}</span>
               <span className="text-sm font-bold text-gray-500">Tabla del {n}</span>
-              <StarRating stars={progress?.stars ?? 0} size="sm" />
             </button>
           )
         })}

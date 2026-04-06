@@ -12,10 +12,11 @@ interface Props {
   table: number
   correct: number
   mode: 'free' | 'progressive'
+  difficulty?: 'easy' | 'hard'
   onNavigate: (screen: Screen) => void
 }
 
-export default function SessionResults({ table, correct, mode, onNavigate }: Props) {
+export default function SessionResults({ table, correct, mode, difficulty = 'easy', onNavigate }: Props) {
   const { recordSessionResult, unicorn } = useGameStore()
   const sound = useSound()
   const [newAccessories, setNewAccessories] = useState<AccessoryId[]>([])
@@ -31,12 +32,12 @@ export default function SessionResults({ table, correct, mode, onNavigate }: Pro
     recorded.current = true
 
     sound.enable()
-    const unlocked = recordSessionResult(table, correct)
+    const unlocked = recordSessionResult(table, correct, mode)
     setNewAccessories(unlocked)
 
     setTimeout(() => {
       setStarsAnimated(true)
-      if (stars > 0) {
+      if (mode === 'progressive' && stars > 0) {
         sound.playStarFanfare()
         setConfetti(true)
         setTimeout(() => setConfetti(false), 2500)
@@ -62,7 +63,9 @@ export default function SessionResults({ table, correct, mode, onNavigate }: Pro
       <div className="relative z-10 bg-white rounded-3xl shadow-xl p-6 flex flex-col items-center gap-3 border-2 border-magic-purple/30 w-full max-w-xs">
         <p className="text-lg font-bold text-gray-500">Tabla del {table}</p>
         <p className="text-6xl font-black text-magic-purple">{correct}/10</p>
-        <StarRating stars={starsAnimated ? stars : 0} size="lg" animated={starsAnimated} />
+        {mode === 'progressive' && (
+          <StarRating stars={starsAnimated ? stars : 0} size="lg" animated={starsAnimated} />
+        )}
       </div>
 
       {/* Unicorn */}
@@ -73,7 +76,7 @@ export default function SessionResults({ table, correct, mode, onNavigate }: Pro
       {/* Action buttons */}
       <div className="relative z-10 flex flex-col gap-3 w-full max-w-xs">
         <button
-          onClick={() => onNavigate({ name: 'practice-session', table, mode })}
+          onClick={() => onNavigate({ name: 'practice-session', table, mode, difficulty })}
           className="w-full h-16 bg-magic-purple text-white rounded-2xl border-b-4 border-purple-800
             text-xl font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
         >

@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import type { Screen } from './types'
+import { useGameStore } from './store/gameStore'
+import UserSelect from './pages/UserSelect'
 import Home from './pages/Home'
 import FreeMode from './pages/FreeMode'
 import ProgressiveMode from './pages/ProgressiveMode'
@@ -9,13 +11,30 @@ import UnicornCustomizer from './pages/UnicornCustomizer'
 import TableReference from './pages/TableReference'
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>({ name: 'home' })
+  const [screen, setScreen] = useState<Screen>({ name: 'user-select' })
+  const { init, loaded, logout } = useGameStore()
 
   const navigate = (next: Screen) => setScreen(next)
 
+  const handleLogin = async (userId: number) => {
+    await init(userId)
+    setScreen({ name: 'home' })
+  }
+
+  const handleLogout = () => {
+    logout()
+    setScreen({ name: 'user-select' })
+  }
+
+  // Brief blank while fetching state after login
+  if (screen.name !== 'user-select' && !loaded) return null
+
   switch (screen.name) {
+    case 'user-select':
+      return <UserSelect onLogin={handleLogin} />
+
     case 'home':
-      return <Home onNavigate={navigate} />
+      return <Home onNavigate={navigate} onLogout={handleLogout} />
 
     case 'free-mode':
       return <FreeMode onNavigate={navigate} />
@@ -29,6 +48,7 @@ export default function App() {
           table={screen.table}
           mode={screen.mode}
           ordered={screen.ordered}
+          difficulty={screen.difficulty}
           onNavigate={navigate}
         />
       )
@@ -39,6 +59,7 @@ export default function App() {
           table={screen.table}
           correct={screen.correct}
           mode={screen.mode}
+          difficulty={screen.difficulty}
           onNavigate={navigate}
         />
       )

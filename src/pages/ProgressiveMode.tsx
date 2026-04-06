@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { Screen } from '../types'
 import { useGameStore } from '../store/gameStore'
 import { isTableUnlocked } from '../utils/game'
@@ -10,6 +11,7 @@ interface Props {
 
 export default function ProgressiveMode({ onNavigate }: Props) {
   const { tables } = useGameStore()
+  const [difficulty, setDifficulty] = useState<'easy' | 'hard'>('easy')
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-magic-lavender to-magic-rose flex flex-col items-center gap-5 p-6 font-nunito relative overflow-hidden">
@@ -31,12 +33,30 @@ export default function ProgressiveMode({ onNavigate }: Props) {
         Consigue ≥2 estrellas en una tabla para desbloquear la siguiente 🔓
       </p>
 
+      {/* Difficulty toggle */}
+      <div className="relative z-10 flex bg-white rounded-2xl border-2 border-magic-purple p-1 gap-1 w-full max-w-md">
+        <button
+          onClick={() => setDifficulty('easy')}
+          className={`flex-1 h-11 rounded-xl text-base font-black transition-all
+            ${difficulty === 'easy' ? 'bg-teal-400 text-white shadow' : 'text-teal-600'}`}
+        >
+          ⭐ Fácil
+        </button>
+        <button
+          onClick={() => setDifficulty('hard')}
+          className={`flex-1 h-11 rounded-xl text-base font-black transition-all
+            ${difficulty === 'hard' ? 'bg-rose-500 text-white shadow' : 'text-rose-600'}`}
+        >
+          🔥 Difícil
+        </button>
+      </div>
+
       <div className="relative z-10 w-full overflow-y-auto no-scrollbar pb-8">
         <ProgressMap
           tables={tables}
           isUnlocked={(n) => isTableUnlocked(n, tables)}
           onSelectTable={(n) =>
-            onNavigate({ name: 'practice-session', table: n, mode: 'progressive' })
+            onNavigate({ name: 'practice-session', table: n, mode: 'progressive', difficulty })
           }
         />
       </div>

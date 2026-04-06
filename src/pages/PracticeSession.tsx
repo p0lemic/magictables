@@ -3,12 +3,14 @@ import type { Screen, SessionQuestion } from '../types'
 import { generateSession, generateOrderedSession, generateWrongOptions } from '../utils/game'
 import { useSound } from '../hooks/useSound'
 import MultipleChoiceInput from '../components/MultipleChoiceInput'
+import NumericKeyboard from '../components/NumericKeyboard'
 import StarParticles from '../components/StarParticles'
 
 interface Props {
   table: number
   mode: 'free' | 'progressive'
   ordered?: boolean
+  difficulty?: 'easy' | 'hard'
   onNavigate: (screen: Screen) => void
 }
 
@@ -24,7 +26,7 @@ function shuffleOptions(correct: number): number[] {
   return all
 }
 
-export default function PracticeSession({ table, mode, ordered = false, onNavigate }: Props) {
+export default function PracticeSession({ table, mode, ordered = false, difficulty = 'easy', onNavigate }: Props) {
   const sound = useSound()
 
   const [questions] = useState<SessionQuestion[]>(() =>
@@ -59,7 +61,7 @@ export default function PracticeSession({ table, mode, ordered = false, onNaviga
     setTimeout(() => {
       if (current + 1 >= 10) {
         const finalCorrect = isCorrect ? correct + 1 : correct
-        onNavigate({ name: 'session-results', table, correct: finalCorrect, mode })
+        onNavigate({ name: 'session-results', table, correct: finalCorrect, mode, difficulty })
       } else {
         setCurrent(prev => prev + 1)
         setFeedback('none')
@@ -121,11 +123,19 @@ export default function PracticeSession({ table, mode, ordered = false, onNaviga
 
       {/* Input */}
       <div className="relative z-10 w-full flex justify-center">
-        <MultipleChoiceInput
-          options={options[current]}
-          onAnswer={handleAnswer}
-          disabled={feedback !== 'none'}
-        />
+        {difficulty === 'hard' ? (
+          <NumericKeyboard
+            key={current}
+            onAnswer={handleAnswer}
+            disabled={feedback !== 'none'}
+          />
+        ) : (
+          <MultipleChoiceInput
+            options={options[current]}
+            onAnswer={handleAnswer}
+            disabled={feedback !== 'none'}
+          />
+        )}
       </div>
 
       {/* Score so far */}
