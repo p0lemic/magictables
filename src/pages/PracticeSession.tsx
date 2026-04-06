@@ -73,21 +73,21 @@ export default function PracticeSession({ table, mode, onNavigate }: Props) {
     <div className="min-h-screen bg-gradient-to-br from-magic-lavender to-magic-rose flex flex-col items-center gap-5 p-6 font-nunito relative overflow-hidden">
       <StarParticles />
 
+      {/* Header row: back button + progress label */}
+      <div className="relative z-10 w-full max-w-md flex items-center gap-3 pt-2">
+        <button
+          onClick={() => onNavigate(mode === 'free' ? { name: 'free-mode' } : { name: 'progressive-mode' })}
+          className="w-12 h-12 bg-white rounded-xl border-2 border-b-4 border-magic-purple
+            text-2xl active:scale-95 transition-all shadow-sm flex items-center justify-center shrink-0"
+        >
+          ←
+        </button>
+        <div className="flex-1 font-bold text-magic-purple text-lg">Tabla del {table}</div>
+        <span className="font-bold text-magic-purple">{current + 1} / 10</span>
+      </div>
+
       {/* Progress bar */}
-      <div className="relative z-10 w-full max-w-md">
-        <div className="flex justify-between items-center text-sm font-bold text-magic-purple mb-1">
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => onNavigate(mode === 'free' ? { name: 'free-mode' } : { name: 'progressive-mode' })}
-              className="w-8 h-8 bg-white rounded-lg border-2 border-b-4 border-magic-purple
-                text-base active:scale-95 transition-all shadow-sm flex items-center justify-center"
-            >
-              ←
-            </button>
-            <span>Tabla del {table}</span>
-          </div>
-          <span>{current + 1} / 10</span>
-        </div>
+      <div className="relative z-10 w-full max-w-md -mt-2">
         <div className="h-4 bg-white/60 rounded-full overflow-hidden border border-magic-purple/30">
           <div
             className="h-full bg-magic-purple rounded-full transition-all duration-500"
