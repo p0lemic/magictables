@@ -163,17 +163,21 @@ export default function UserSelect({ onLogin }: Props) {
       return
     }
 
-    const res = await fetch('/api/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, pin: usePin ? newPin : undefined }),
-    })
-    const data = await res.json()
-    if (!res.ok) {
-      setCreateError(data.error === 'name taken' ? 'Ese nombre ya existe' : 'Error al crear')
-      return
+    try {
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, pin: usePin ? newPin : undefined }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setCreateError(data.error === 'name taken' ? 'Ese nombre ya existe' : 'Error al crear')
+        return
+      }
+      await loginAs(data.id)
+    } catch {
+      setCreateError('No se puede conectar con el servidor')
     }
-    await loginAs(data.id)
   }
 
   function openCreate() {
