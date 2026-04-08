@@ -12,15 +12,27 @@ export type AccessoryId =
   | 'magic-cape'
   | 'diamond-crown'
   | 'phoenix-wings'
-  | 'glitter-sparkle';
+  | 'glitter-sparkle'
+  // Hard mode exclusives
+  | 'flame-horn'
+  | 'dragon-wings'
+  | 'star-tiara'
+  | 'galaxy-cape'
+  | 'thunder-wings'
+  | 'ice-crown'
+  | 'cosmic-horn';
 
-export type UnicornColor = 'white' | 'lavender' | 'pink' | 'mint' | 'yellow' | 'sky';
+export type UnicornColor =
+  | 'white' | 'lavender' | 'pink' | 'mint' | 'yellow' | 'sky'
+  // Hard mode exclusives
+  | 'coral' | 'gold' | 'magic-purple' | 'silver' | 'ocean' | 'rainbow';
 
 export interface TableProgress {
-  stars: number;           // 0–3, best historical score only
-  masteryPercent: number;  // (totalCorrect / totalAttempts) × 100
+  stars: number;           // 0–3, best easy/progressive score
+  masteryPercent: number;
   totalAttempts: number;
   totalCorrect: number;
+  hardStars?: number;      // 0–3, best hard mode score (optional = backwards compatible)
 }
 
 export interface UnicornEquipped {
@@ -34,6 +46,7 @@ export interface UnicornEquipped {
 export interface UnicornState {
   unlockedAccessories: AccessoryId[];
   equipped: UnicornEquipped;
+  unlockedColors: UnicornColor[];   // hard-mode unlocked colors
 }
 
 export interface SessionQuestion {
@@ -50,7 +63,6 @@ export interface User {
   equipped: UnicornEquipped
 }
 
-// State-machine router screens
 export type Screen =
   | { name: 'user-select' }
   | { name: 'home' }
@@ -61,13 +73,46 @@ export type Screen =
   | { name: 'unicorn-customizer' }
   | { name: 'table-reference' };
 
+export const BASE_COLORS: UnicornColor[] = ['white', 'lavender', 'pink', 'mint', 'yellow', 'sky'];
+export const HARD_COLORS: UnicornColor[] = ['coral', 'gold', 'magic-purple', 'silver', 'ocean', 'rainbow'];
+
 export const UNICORN_COLOR_HEX: Record<UnicornColor, string> = {
-  white:    '#FFFFFF',
-  lavender: '#E8D5FF',
-  pink:     '#FFB3D9',
-  mint:     '#B3FFE8',
-  yellow:   '#FFF4B3',
-  sky:      '#B3E8FF',
+  white:          '#FFFFFF',
+  lavender:       '#E8D5FF',
+  pink:           '#FFB3D9',
+  mint:           '#B3FFE8',
+  yellow:         '#FFF4B3',
+  sky:            '#B3E8FF',
+  coral:          '#FFB347',
+  gold:           '#FFD700',
+  'magic-purple': '#C39BD3',
+  silver:         '#D5D8DC',
+  ocean:          '#85C1E9',
+  rainbow:        '#FF85EA',
+};
+
+export const COLOR_LABEL: Record<UnicornColor, string> = {
+  white:          'Blanca',
+  lavender:       'Lila',
+  pink:           'Rosa',
+  mint:           'Menta',
+  yellow:         'Amarilla',
+  sky:            'Celeste',
+  coral:          'Coral',
+  gold:           'Dorada',
+  'magic-purple': 'Púrpura Mágico',
+  silver:         'Plateada',
+  ocean:          'Azul Océano',
+  rainbow:        'Arcoíris',
+};
+
+export const HARD_COLOR_UNLOCK_HINT: Partial<Record<UnicornColor, string>> = {
+  coral:          'Consigue 5 estrellas en modo difícil',
+  gold:           'Consigue 10 estrellas en modo difícil',
+  silver:         'Consigue 18 estrellas en modo difícil',
+  'magic-purple': 'Consigue 22 estrellas en modo difícil',
+  ocean:          'Consigue 28 estrellas en modo difícil',
+  rainbow:        'Completa todas las tablas en modo difícil',
 };
 
 export const ACCESSORY_LABEL: Record<AccessoryId, string> = {
@@ -85,6 +130,13 @@ export const ACCESSORY_LABEL: Record<AccessoryId, string> = {
   'diamond-crown':   'Corona de Diamante',
   'phoenix-wings':   'Alas de Fénix',
   'glitter-sparkle': 'Destello de Purpurina',
+  'flame-horn':      'Cuerno de Fuego',
+  'dragon-wings':    'Alas de Dragón',
+  'star-tiara':      'Tiara de Estrellas',
+  'galaxy-cape':     'Capa Galaxia',
+  'thunder-wings':   'Alas de Trueno',
+  'ice-crown':       'Corona de Hielo',
+  'cosmic-horn':     'Cuerno Cósmico',
 };
 
 export const ACCESSORY_UNLOCK_HINT: Record<AccessoryId, string> = {
@@ -102,4 +154,11 @@ export const ACCESSORY_UNLOCK_HINT: Record<AccessoryId, string> = {
   'diamond-crown':   'Consigue 3 estrellas en 3 tablas',
   'phoenix-wings':   'Consigue 3 estrellas en 7 tablas',
   'glitter-sparkle': 'Consigue 3 estrellas en TODAS las tablas',
+  'flame-horn':      'Consigue 1 estrella en modo difícil',
+  'dragon-wings':    'Consigue 3 estrellas en modo difícil',
+  'star-tiara':      'Consigue 8 estrellas en modo difícil',
+  'galaxy-cape':     'Consigue 12 estrellas en modo difícil',
+  'thunder-wings':   'Consigue 15 estrellas en modo difícil',
+  'ice-crown':       'Consigue 20 estrellas en modo difícil',
+  'cosmic-horn':     'Consigue 25 estrellas en modo difícil',
 };
