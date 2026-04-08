@@ -228,9 +228,10 @@ export default function UserSelect({ onLogin }: Props) {
                   <span className="font-black text-magic-purple text-base leading-tight text-center">
                     {user.name}
                   </span>
-                  <span className="text-sm font-bold text-amber-500">
-                    ⭐ {user.totalStars}/30
-                  </span>
+                  <div className="flex items-center gap-2 text-sm font-bold">
+                    <span className="text-amber-500">★ {user.totalStars}/30</span>
+                    <span className="text-blue-400">★ {user.totalHardStars}/30</span>
+                  </div>
                   {user.hasPin && (
                     <span className="text-xs text-gray-400 font-bold">🔒 PIN</span>
                   )}

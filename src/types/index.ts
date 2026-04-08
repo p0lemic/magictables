@@ -60,6 +60,7 @@ export interface User {
   name: string
   hasPin: boolean
   totalStars: number
+  totalHardStars: number
   equipped: UnicornEquipped
 }
 

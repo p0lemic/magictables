@@ -69,16 +69,18 @@ app.get('/api/users', (_req, res) => {
   const result = users.map(u => {
     const row = db.prepare('SELECT data FROM user_state WHERE user_id = ?').get(u.id)
     let totalStars = 0
+    let totalHardStars = 0
     let equipped = { ...DEFAULT_EQUIPPED }
     if (row) {
       try {
         const state = JSON.parse(row.data)
-        totalStars = Object.values(state.tables ?? {})
-          .reduce((sum, t) => sum + (t.stars ?? 0), 0)
+        const tables = Object.values(state.tables ?? {})
+        totalStars = tables.reduce((sum, t) => sum + (t.stars ?? 0), 0)
+        totalHardStars = tables.reduce((sum, t) => sum + (t.hardStars ?? 0), 0)
         equipped = state.unicorn?.equipped ?? equipped
       } catch { /* ignore corrupt state */ }
     }
-    return { id: u.id, name: u.name, hasPin: !!u.pin, totalStars, equipped }
+    return { id: u.id, name: u.name, hasPin: !!u.pin, totalStars, totalHardStars, equipped }
   })
 
   res.json(result)
