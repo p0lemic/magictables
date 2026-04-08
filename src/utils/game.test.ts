@@ -2,14 +2,16 @@ import { describe, it, expect } from 'vitest'
 import {
   calculateStars,
   computeUnlockedAccessories,
+  computeTotalHardStars,
+  computeUnlockedColors,
   isTableUnlocked,
   generateSession,
   generateWrongOptions,
 } from './game'
 import type { TableProgress } from '../types'
 
-function makeTable(stars: number, attempts = 10, correct = 5): TableProgress {
-  return { stars, masteryPercent: correct / attempts * 100, totalAttempts: attempts, totalCorrect: correct }
+function makeTable(stars: number, attempts = 10, correct = 5, hardStars = 0): TableProgress {
+  return { stars, masteryPercent: correct / attempts * 100, totalAttempts: attempts, totalCorrect: correct, hardStars }
 }
 
 function emptyTables(): Record<number, TableProgress> {
@@ -185,5 +187,104 @@ describe('generateWrongOptions', () => {
       const opts = generateWrongOptions(15)
       expect(new Set(opts).size).toBe(3)
     }
+  })
+})
+
+// ── computeUnlockedAccessories (hard mode) ───────────────────────────────────
+
+describe('computeUnlockedAccessories — hard mode', () => {
+  it('does not unlock hard accessories with 0 hard stars', () => {
+    const result = computeUnlockedAccessories(emptyTables(), 0)
+    expect(result).not.toContain('flame-horn')
+  })
+
+  it('unlocks flame-horn with 1 hard star', () => {
+    expect(computeUnlockedAccessories(emptyTables(), 1)).toContain('flame-horn')
+  })
+
+  it('unlocks dragon-wings with 3 hard stars', () => {
+    expect(computeUnlockedAccessories(emptyTables(), 3)).toContain('dragon-wings')
+  })
+
+  it('does not unlock dragon-wings with 2 hard stars', () => {
+    expect(computeUnlockedAccessories(emptyTables(), 2)).not.toContain('dragon-wings')
+  })
+
+  it('unlocks cosmic-horn with 25 hard stars', () => {
+    expect(computeUnlockedAccessories(emptyTables(), 25)).toContain('cosmic-horn')
+  })
+
+  it('existing easy accessories still work alongside hard stars', () => {
+    const tables = emptyTables()
+    tables[1] = makeTable(1)
+    const result = computeUnlockedAccessories(tables, 1)
+    expect(result).toContain('rainbow-horn')
+    expect(result).toContain('flame-horn')
+  })
+})
+
+// ── computeTotalHardStars ────────────────────────────────────────────────────
+
+describe('computeTotalHardStars', () => {
+  it('returns 0 for tables with no hardStars', () => {
+    expect(computeTotalHardStars(emptyTables())).toBe(0)
+  })
+
+  it('sums hardStars across tables', () => {
+    const tables = emptyTables()
+    tables[1] = makeTable(0, 10, 5, 3)
+    tables[2] = makeTable(0, 10, 5, 2)
+    expect(computeTotalHardStars(tables)).toBe(5)
+  })
+
+  it('handles missing hardStars field (undefined = 0)', () => {
+    const tables = emptyTables()
+    tables[1] = { stars: 2, masteryPercent: 80, totalAttempts: 10, totalCorrect: 8 }
+    expect(computeTotalHardStars(tables)).toBe(0)
+  })
+})
+
+// ── computeUnlockedColors ────────────────────────────────────────────────────
+
+describe('computeUnlockedColors', () => {
+  it('returns empty for 0 hard stars', () => {
+    expect(computeUnlockedColors(0)).toEqual([])
+  })
+
+  it('unlocks coral at 5 hard stars', () => {
+    expect(computeUnlockedColors(5)).toContain('coral')
+    expect(computeUnlockedColors(4)).not.toContain('coral')
+  })
+
+  it('unlocks gold at 10 hard stars', () => {
+    expect(computeUnlockedColors(10)).toContain('gold')
+    expect(computeUnlockedColors(9)).not.toContain('gold')
+  })
+
+  it('unlocks silver at 18 hard stars', () => {
+    expect(computeUnlockedColors(18)).toContain('silver')
+  })
+
+  it('unlocks magic-purple at 22 hard stars', () => {
+    expect(computeUnlockedColors(22)).toContain('magic-purple')
+  })
+
+  it('unlocks ocean at 28 hard stars', () => {
+    expect(computeUnlockedColors(28)).toContain('ocean')
+  })
+
+  it('unlocks rainbow at 30 hard stars', () => {
+    expect(computeUnlockedColors(30)).toContain('rainbow')
+    expect(computeUnlockedColors(29)).not.toContain('rainbow')
+  })
+
+  it('unlocks all colors at 30 hard stars', () => {
+    const colors = computeUnlockedColors(30)
+    expect(colors).toContain('coral')
+    expect(colors).toContain('gold')
+    expect(colors).toContain('silver')
+    expect(colors).toContain('magic-purple')
+    expect(colors).toContain('ocean')
+    expect(colors).toContain('rainbow')
   })
 })
