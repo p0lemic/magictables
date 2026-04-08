@@ -184,7 +184,7 @@ export default function UnicornCustomizer({ onNavigate }: Props) {
           accessories={EASY_ACCESSORIES}
           unlockedAccessories={unlockedAccessorySet}
           equipped={equipped}
-          onEquip={(slot, id) => equipAccessory(slot, id)}
+          onEquip={equipAccessory}
         />
       </div>
 
@@ -196,7 +196,7 @@ export default function UnicornCustomizer({ onNavigate }: Props) {
           accessories={HARD_ACCESSORIES}
           unlockedAccessories={unlockedAccessorySet}
           equipped={equipped}
-          onEquip={(slot, id) => equipAccessory(slot, id)}
+          onEquip={equipAccessory}
         />
       </div>
 
