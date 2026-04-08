@@ -83,6 +83,7 @@ export function generateSession(tableNumber: number): SessionQuestion[] {
     b: i + 1,
     answer: tableNumber * (i + 1),
   }))
+  // Fisher-Yates shuffle
   for (let i = questions.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[questions[i], questions[j]] = [questions[j], questions[i]]
@@ -106,6 +107,7 @@ export function generateWrongOptions(correct: number): number[] {
     .map(o => correct + o)
     .filter(n => n > 0 && n !== correct)
 
+  // Shuffle candidates and take first 3
   for (let i = candidates.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
     ;[candidates[i], candidates[j]] = [candidates[j], candidates[i]]
