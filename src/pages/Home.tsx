@@ -12,6 +12,7 @@ export default function Home({ onNavigate, onLogout }: Props) {
   const { tables, unicorn } = useGameStore()
 
   const totalStars = Object.values(tables).reduce((sum, t) => sum + t.stars, 0)
+  const totalHardStars = Object.values(tables).reduce((sum, t) => sum + (t.hardStars ?? 0), 0)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-magic-lavender to-magic-rose flex flex-col items-center justify-center gap-6 p-6 relative overflow-hidden font-nunito">
@@ -40,9 +41,12 @@ export default function Home({ onNavigate, onLogout }: Props) {
       </div>
 
       {/* Stars count */}
-      <div className="relative z-10 bg-white/70 backdrop-blur-sm rounded-2xl px-6 py-2 border-2 border-magic-yellow shadow-md">
+      <div className="relative z-10 bg-white/70 backdrop-blur-sm rounded-2xl px-6 py-3 border-2 border-magic-yellow shadow-md flex gap-4">
         <span className="text-2xl font-black text-amber-500">
-          ⭐ {totalStars} / 30 estrellas
+          ★ {totalStars}/30
+        </span>
+        <span className="text-2xl font-black text-blue-400">
+          ★ {totalHardStars}/30
         </span>
       </div>
 
