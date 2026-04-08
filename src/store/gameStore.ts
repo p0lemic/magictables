@@ -107,6 +107,8 @@ export const useGameStore = create<GameStore>()((set, get) => ({
     const totalAttempts = prev.totalAttempts + 10
     const totalCorrect = prev.totalCorrect + correct
     const masteryPercent = (totalCorrect / totalAttempts) * 100
+    // Stars (both easy and hard) are only earned in progressive mode.
+    // Free mode is casual practice — no star tracking by design.
     const sessionStars = mode === 'progressive' ? calculateStars(correct) : 0
 
     const updatedTable: TableProgress = {
