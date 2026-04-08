@@ -77,6 +77,12 @@ export const useGameStore = create<GameStore>()((set, get) => ({
           if (!data.unicorn.unlockedColors) {
             data.unicorn.unlockedColors = []
           }
+          // Migrate: ensure hardStars exists on every table entry
+          for (const key of Object.keys(data.tables)) {
+            if (data.tables[key].hardStars === undefined) {
+              data.tables[key].hardStars = 0
+            }
+          }
           set({ tables: data.tables, unicorn: data.unicorn, loaded: true })
         } else {
           set({ loaded: true })
