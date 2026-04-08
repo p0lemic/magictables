@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { AccessoryId, TableProgress, UnicornColor, UnicornEquipped, UnicornState } from '../types'
-import { calculateStars, computeUnlockedAccessories } from '../utils/game'
+import { calculateStars, computeUnlockedAccessories, computeUnlockedColors, computeTotalHardStars } from '../utils/game'
 
 interface GameStore {
   tables: Record<number, TableProgress>
@@ -9,7 +9,12 @@ interface GameStore {
   userId: number | null
   init: (userId: number) => Promise<void>
   logout: () => void
-  recordSessionResult: (table: number, correct: number, mode: 'free' | 'progressive') => AccessoryId[]
+  recordSessionResult: (
+    table: number,
+    correct: number,
+    mode: 'free' | 'progressive',
+    difficulty?: 'easy' | 'hard'
+  ) => { accessories: AccessoryId[]; colors: UnicornColor[] }
   equipAccessory: (slot: keyof UnicornEquipped, value: string) => void
 }
 
@@ -18,6 +23,7 @@ const DEFAULT_TABLE: TableProgress = {
   masteryPercent: 0,
   totalAttempts: 0,
   totalCorrect: 0,
+  hardStars: 0,
 }
 
 function defaultTables(): Record<number, TableProgress> {
@@ -28,6 +34,7 @@ function defaultTables(): Record<number, TableProgress> {
 
 const DEFAULT_UNICORN: UnicornState = {
   unlockedAccessories: [],
+  unlockedColors: [],
   equipped: {
     horn: null,
     wings: null,
@@ -66,6 +73,10 @@ export const useGameStore = create<GameStore>()((set, get) => ({
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
         if (data?.tables && data?.unicorn) {
+          // Migrate: ensure unlockedColors exists for old saves
+          if (!data.unicorn.unlockedColors) {
+            data.unicorn.unlockedColors = []
+          }
           set({ tables: data.tables, unicorn: data.unicorn, loaded: true })
         } else {
           set({ loaded: true })
@@ -84,30 +95,48 @@ export const useGameStore = create<GameStore>()((set, get) => ({
     set(freshState())
   },
 
-  recordSessionResult(table, correct, mode) {
+  recordSessionResult(table, correct, mode, difficulty = 'easy') {
     const state = get()
     const prev = state.tables[table] ?? { ...DEFAULT_TABLE }
     const totalAttempts = prev.totalAttempts + 10
     const totalCorrect = prev.totalCorrect + correct
     const masteryPercent = (totalCorrect / totalAttempts) * 100
-    const bestStars = mode === 'progressive'
-      ? Math.max(prev.stars, calculateStars(correct))
-      : prev.stars
+    const sessionStars = mode === 'progressive' ? calculateStars(correct) : 0
+
+    const updatedTable: TableProgress = {
+      ...prev,
+      masteryPercent,
+      totalAttempts,
+      totalCorrect,
+      stars: difficulty === 'hard' ? prev.stars : Math.max(prev.stars, sessionStars),
+      hardStars: difficulty === 'hard' ? Math.max(prev.hardStars ?? 0, sessionStars) : (prev.hardStars ?? 0),
+    }
 
     const updatedTables: Record<number, TableProgress> = {
       ...state.tables,
-      [table]: { stars: bestStars, masteryPercent, totalAttempts, totalCorrect },
+      [table]: updatedTable,
     }
 
-    const prevUnlocked = new Set(state.unicorn.unlockedAccessories)
-    const nowUnlocked = computeUnlockedAccessories(updatedTables)
-    const newlyUnlocked = nowUnlocked.filter(a => !prevUnlocked.has(a))
+    const totalHardStars = computeTotalHardStars(updatedTables)
+    const prevUnlockedAccessories = new Set(state.unicorn.unlockedAccessories)
+    const prevUnlockedColors = new Set(state.unicorn.unlockedColors)
 
-    const updatedUnicorn = { ...state.unicorn, unlockedAccessories: nowUnlocked }
+    const nowUnlockedAccessories = computeUnlockedAccessories(updatedTables, totalHardStars)
+    const nowUnlockedColors = computeUnlockedColors(totalHardStars)
+
+    const newlyUnlockedAccessories = nowUnlockedAccessories.filter(a => !prevUnlockedAccessories.has(a))
+    const newlyUnlockedColors = nowUnlockedColors.filter(c => !prevUnlockedColors.has(c))
+
+    const updatedUnicorn: UnicornState = {
+      ...state.unicorn,
+      unlockedAccessories: nowUnlockedAccessories,
+      unlockedColors: nowUnlockedColors,
+    }
+
     set({ tables: updatedTables, unicorn: updatedUnicorn })
     if (state.userId) saveToApi(state.userId, updatedTables, updatedUnicorn)
 
-    return newlyUnlocked
+    return { accessories: newlyUnlockedAccessories, colors: newlyUnlockedColors }
   },
 
   equipAccessory(slot, value) {
