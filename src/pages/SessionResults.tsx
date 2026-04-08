@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import type { AccessoryId, Screen } from '../types'
-import { ACCESSORY_LABEL } from '../types'
+import type { AccessoryId, UnicornColor, Screen } from '../types'
+import { ACCESSORY_LABEL, COLOR_LABEL, UNICORN_COLOR_HEX } from '../types'
 import { useGameStore } from '../store/gameStore'
 import { useSound } from '../hooks/useSound'
 import StarRating from '../components/StarRating'
@@ -20,6 +20,7 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
   const { recordSessionResult, unicorn } = useGameStore()
   const sound = useSound()
   const [newAccessories, setNewAccessories] = useState<AccessoryId[]>([])
+  const [newColors, setNewColors] = useState<UnicornColor[]>([])
   const [showUnlockModal, setShowUnlockModal] = useState(false)
   const [confetti, setConfetti] = useState(false)
   const [starsAnimated, setStarsAnimated] = useState(false)
@@ -32,8 +33,9 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
     recorded.current = true
 
     sound.enable()
-    const unlocked = recordSessionResult(table, correct, mode)
-    setNewAccessories(unlocked)
+    const { accessories, colors } = recordSessionResult(table, correct, mode, difficulty)
+    setNewAccessories(accessories)
+    setNewColors(colors)
 
     setTimeout(() => {
       setStarsAnimated(true)
@@ -44,7 +46,7 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
       }
     }, 400)
 
-    if (unlocked.length > 0) {
+    if (accessories.length > 0 || colors.length > 0) {
       setTimeout(() => setShowUnlockModal(true), 2200)
     }
   }, [])
@@ -65,6 +67,9 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
         <p className="text-6xl font-black text-magic-purple">{correct}/10</p>
         {mode === 'progressive' && (
           <StarRating stars={starsAnimated ? stars : 0} size="lg" animated={starsAnimated} />
+        )}
+        {difficulty === 'hard' && (
+          <span className="text-sm font-bold text-orange-500">🔥 Modo Difícil</span>
         )}
       </div>
 
@@ -110,8 +115,8 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
         </button>
       </div>
 
-      {/* Accessory unlock modal */}
-      {showUnlockModal && newAccessories.length > 0 && (
+      {/* Accessory/color unlock modal */}
+      {showUnlockModal && (newAccessories.length > 0 || newColors.length > 0) && (
         <div
           className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6 animate-fade-in"
           onClick={() => setShowUnlockModal(false)}
@@ -121,13 +126,24 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
             onClick={e => e.stopPropagation()}
           >
             <p className="text-2xl font-black text-magic-purple text-center">
-              🎉 ¡Nuevo accesorio!
+              🎉 ¡Nuevo desbloqueo!
             </p>
             <div className="animate-spin-slow text-6xl">✨</div>
             {newAccessories.map(a => (
               <p key={a} className="text-xl font-black text-amber-500 text-center">
                 🦄 {ACCESSORY_LABEL[a]}
               </p>
+            ))}
+            {newColors.map(c => (
+              <div key={c} className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 rounded-full border-2 border-gray-200 shadow"
+                  style={{ backgroundColor: UNICORN_COLOR_HEX[c] }}
+                />
+                <p className="text-xl font-black text-amber-500">
+                  🎨 {COLOR_LABEL[c]}
+                </p>
+              </div>
             ))}
             <button
               onClick={() => setShowUnlockModal(false)}
