@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Screen } from '../types'
+import { useTranslation } from '../i18n'
 import StarParticles from '../components/StarParticles'
 
 interface Props {
@@ -7,7 +8,8 @@ interface Props {
 }
 
 export default function FreeMode({ onNavigate }: Props) {
-  const [ordered, setOrdered] = useState(false)
+  const { t } = useTranslation()
+  const [ordered, setOrdered] = useState(true)
   const [difficulty, setDifficulty] = useState<'easy' | 'hard'>('easy')
 
   return (
@@ -23,24 +25,24 @@ export default function FreeMode({ onNavigate }: Props) {
         >
           ←
         </button>
-        <h2 className="text-3xl font-black text-magic-purple">Práctica libre</h2>
+        <h2 className="text-3xl font-black text-magic-purple">{t.freeMode.title}</h2>
       </div>
 
       {/* Order toggle */}
       <div className="relative z-10 flex bg-white rounded-2xl border-2 border-magic-purple p-1 gap-1 w-full max-w-md">
         <button
-          onClick={() => setOrdered(false)}
-          className={`flex-1 h-11 rounded-xl text-base font-black transition-all
-            ${!ordered ? 'bg-magic-purple text-white shadow' : 'text-magic-purple'}`}
-        >
-          🔀 Aleatorio
-        </button>
-        <button
           onClick={() => setOrdered(true)}
           className={`flex-1 h-11 rounded-xl text-base font-black transition-all
             ${ordered ? 'bg-magic-purple text-white shadow' : 'text-magic-purple'}`}
         >
-          🔢 En orden
+          {t.freeMode.ordered}
+        </button>
+        <button
+          onClick={() => setOrdered(false)}
+          className={`flex-1 h-11 rounded-xl text-base font-black transition-all
+            ${!ordered ? 'bg-magic-purple text-white shadow' : 'text-magic-purple'}`}
+        >
+          {t.freeMode.random}
         </button>
       </div>
 
@@ -51,19 +53,19 @@ export default function FreeMode({ onNavigate }: Props) {
           className={`flex-1 h-11 rounded-xl text-base font-black transition-all
             ${difficulty === 'easy' ? 'bg-teal-400 text-white shadow' : 'text-teal-600'}`}
         >
-          ⭐ Fácil
+          {t.freeMode.easy}
         </button>
         <button
           onClick={() => setDifficulty('hard')}
           className={`flex-1 h-11 rounded-xl text-base font-black transition-all
             ${difficulty === 'hard' ? 'bg-rose-500 text-white shadow' : 'text-rose-600'}`}
         >
-          🔥 Difícil
+          {t.freeMode.hard}
         </button>
       </div>
 
       <p className="relative z-10 text-lg font-bold text-pink-500">
-        ¿Qué tabla quieres practicar?
+        {t.freeMode.selectTable}
       </p>
 
       {/* Table grid */}
@@ -79,7 +81,7 @@ export default function FreeMode({ onNavigate }: Props) {
                 active:scale-95 active:border-b-2 transition-all"
             >
               <span className="text-4xl font-black text-magic-purple">×{n}</span>
-              <span className="text-sm font-bold text-gray-500">Tabla del {n}</span>
+              <span className="text-sm font-bold text-gray-500">{t.freeMode.table({ n })}</span>
             </button>
           )
         })}

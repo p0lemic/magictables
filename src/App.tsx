@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Screen } from './types'
 import { useGameStore } from './store/gameStore'
+import { LanguageProvider } from './i18n'
 import UserSelect from './pages/UserSelect'
 import Home from './pages/Home'
 import FreeMode from './pages/FreeMode'
@@ -10,7 +11,7 @@ import SessionResults from './pages/SessionResults'
 import UnicornCustomizer from './pages/UnicornCustomizer'
 import TableReference from './pages/TableReference'
 
-export default function App() {
+function AppInner() {
   const [screen, setScreen] = useState<Screen>({ name: 'user-select' })
   const { init, loaded, logout } = useGameStore()
 
@@ -70,4 +71,12 @@ export default function App() {
     case 'table-reference':
       return <TableReference onNavigate={navigate} />
   }
+}
+
+export default function App() {
+  return (
+    <LanguageProvider>
+      <AppInner />
+    </LanguageProvider>
+  )
 }

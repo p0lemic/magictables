@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import type { AccessoryId, UnicornColor, Screen } from '../types'
-import { ACCESSORY_LABEL, COLOR_LABEL, UNICORN_COLOR_HEX } from '../types'
+import type { AccessoryId, DragonAccessoryId, DragonColor, UnicornColor, Screen } from '../types'
+import { UNICORN_COLOR_HEX, DRAGON_COLOR_HEX } from '../types'
 import { useGameStore } from '../store/gameStore'
 import { useSound } from '../hooks/useSound'
+import { useTranslation } from '../i18n'
 import StarRating from '../components/StarRating'
 import ConfettiAnimation from '../components/ConfettiAnimation'
-import UnicornAvatar from '../components/UnicornAvatar'
+import CreatureAvatar from '../components/CreatureAvatar'
 import StarParticles from '../components/StarParticles'
 
 interface Props {
@@ -19,8 +20,11 @@ interface Props {
 export default function SessionResults({ table, correct, mode, difficulty = 'easy', onNavigate }: Props) {
   const { recordSessionResult, unicorn } = useGameStore()
   const sound = useSound()
+  const { t } = useTranslation()
   const [newAccessories, setNewAccessories] = useState<AccessoryId[]>([])
   const [newColors, setNewColors] = useState<UnicornColor[]>([])
+  const [newDragonAccessories, setNewDragonAccessories] = useState<DragonAccessoryId[]>([])
+  const [newDragonColors, setNewDragonColors] = useState<DragonColor[]>([])
   const [showUnlockModal, setShowUnlockModal] = useState(false)
   const [confetti, setConfetti] = useState(false)
   const [starsAnimated, setStarsAnimated] = useState(false)
@@ -33,9 +37,11 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
     recorded.current = true
 
     sound.enable()
-    const { accessories, colors } = recordSessionResult(table, correct, mode, difficulty)
+    const { accessories, colors, dragonAccessories, dragonColors } = recordSessionResult(table, correct, mode, difficulty)
     setNewAccessories(accessories)
     setNewColors(colors)
+    setNewDragonAccessories(dragonAccessories)
+    setNewDragonColors(dragonColors)
 
     setTimeout(() => {
       setStarsAnimated(true)
@@ -46,7 +52,7 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
       }
     }, 400)
 
-    if (accessories.length > 0 || colors.length > 0) {
+    if (accessories.length > 0 || colors.length > 0 || dragonAccessories.length > 0 || dragonColors.length > 0) {
       setTimeout(() => setShowUnlockModal(true), 2200)
     }
   }, [])
@@ -58,24 +64,24 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
 
       {/* Title */}
       <h2 className="relative z-10 text-4xl font-black text-magic-purple">
-        {correct >= 8 ? '¡Increíble! 🎉' : correct >= 5 ? '¡Muy bien! 😊' : '¡Sigue practicando! 💪'}
+        {t.sessionResults.title({ correct })}
       </h2>
 
       {/* Score */}
       <div className="relative z-10 bg-white rounded-3xl shadow-xl p-6 flex flex-col items-center gap-3 border-2 border-magic-purple/30 w-full max-w-xs">
-        <p className="text-lg font-bold text-gray-500">Tabla del {table}</p>
+        <p className="text-lg font-bold text-gray-500">{t.sessionResults.table({ n: table })}</p>
         <p className="text-6xl font-black text-magic-purple">{correct}/10</p>
         {mode === 'progressive' && (
           <StarRating stars={starsAnimated ? stars : 0} size="lg" animated={starsAnimated} />
         )}
         {difficulty === 'hard' && (
-          <span className="text-sm font-bold text-orange-500">🔥 Modo Difícil</span>
+          <span className="text-sm font-bold text-orange-500">{t.sessionResults.hardBadge}</span>
         )}
       </div>
 
       {/* Unicorn */}
       <div className="relative z-10">
-        <UnicornAvatar equipped={unicorn.equipped} size={130} floating />
+        <CreatureAvatar state={unicorn} size={130} floating />
       </div>
 
       {/* Action buttons */}
@@ -85,7 +91,7 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
           className="w-full h-16 bg-magic-purple text-white rounded-2xl border-b-4 border-purple-800
             text-xl font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
         >
-          🔄 Repetir
+          {t.sessionResults.repeat}
         </button>
 
         {mode === 'free' ? (
@@ -94,7 +100,7 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
             className="w-full h-16 bg-magic-pink text-white rounded-2xl border-b-4 border-pink-800
               text-xl font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
           >
-            🎯 Otra tabla
+            {t.sessionResults.anotherTable}
           </button>
         ) : (
           <button
@@ -102,7 +108,7 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
             className="w-full h-16 bg-magic-pink text-white rounded-2xl border-b-4 border-pink-800
               text-xl font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
           >
-            🗺️ Ver mapa
+            {t.sessionResults.viewMap}
           </button>
         )}
 
@@ -111,12 +117,12 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
           className="w-full h-14 bg-white text-magic-purple rounded-2xl border-2 border-b-4 border-magic-purple
             text-xl font-black shadow active:scale-95 transition-all"
         >
-          🏠 Inicio
+          {t.sessionResults.home}
         </button>
       </div>
 
       {/* Accessory/color unlock modal */}
-      {showUnlockModal && (newAccessories.length > 0 || newColors.length > 0) && (
+      {showUnlockModal && (newAccessories.length > 0 || newColors.length > 0 || newDragonAccessories.length > 0 || newDragonColors.length > 0) && (
         <div
           className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6 animate-fade-in"
           onClick={() => setShowUnlockModal(false)}
@@ -126,12 +132,12 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
             onClick={e => e.stopPropagation()}
           >
             <p className="text-2xl font-black text-magic-purple text-center">
-              🎉 ¡Nuevo desbloqueo!
+              {t.sessionResults.newUnlock}
             </p>
             <div className="animate-spin-slow text-6xl">✨</div>
             {newAccessories.map(a => (
               <p key={a} className="text-xl font-black text-amber-500 text-center">
-                🦄 {ACCESSORY_LABEL[a]}
+                🦄 {t.accessoryLabel[a]}
               </p>
             ))}
             {newColors.map(c => (
@@ -141,7 +147,23 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
                   style={{ backgroundColor: UNICORN_COLOR_HEX[c] }}
                 />
                 <p className="text-xl font-black text-amber-500">
-                  🎨 {COLOR_LABEL[c]}
+                  🎨 {t.colorLabel[c]}
+                </p>
+              </div>
+            ))}
+            {newDragonAccessories.map(a => (
+              <p key={a} className="text-xl font-black text-emerald-500 text-center">
+                🐉 {t.dragonAccessoryLabel[a]}
+              </p>
+            ))}
+            {newDragonColors.map(c => (
+              <div key={c} className="flex items-center gap-3">
+                <div
+                  className="w-8 h-8 rounded-full border-2 border-gray-200 shadow"
+                  style={{ backgroundColor: DRAGON_COLOR_HEX[c] }}
+                />
+                <p className="text-xl font-black text-emerald-500">
+                  🐉 {t.dragonColorLabel[c]}
                 </p>
               </div>
             ))}
@@ -150,7 +172,7 @@ export default function SessionResults({ table, correct, mode, difficulty = 'eas
               className="mt-2 w-full h-14 bg-magic-purple text-white rounded-2xl border-b-4 border-purple-800
                 text-xl font-black active:scale-95 transition-all"
             >
-              ¡Genial!
+              {t.sessionResults.great}
             </button>
           </div>
         </div>

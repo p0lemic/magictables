@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { Screen } from '../types'
 import { useGameStore } from '../store/gameStore'
+import { useTranslation } from '../i18n'
 import { isTableUnlocked } from '../utils/game'
 import ProgressMap from '../components/ProgressMap'
 import StarParticles from '../components/StarParticles'
@@ -11,6 +12,7 @@ interface Props {
 
 export default function ProgressiveMode({ onNavigate }: Props) {
   const { tables } = useGameStore()
+  const { t } = useTranslation()
   const [difficulty, setDifficulty] = useState<'easy' | 'hard'>('easy')
 
   return (
@@ -26,11 +28,11 @@ export default function ProgressiveMode({ onNavigate }: Props) {
         >
           ←
         </button>
-        <h2 className="text-3xl font-black text-magic-purple">Modo progresivo</h2>
+        <h2 className="text-3xl font-black text-magic-purple">{t.progressiveMode.title}</h2>
       </div>
 
       <p className="relative z-10 text-base font-bold text-pink-500 -mt-2 text-center px-4">
-        Consigue ≥2 estrellas en una tabla para desbloquear la siguiente 🔓
+        {t.progressiveMode.subtitle}
       </p>
 
       {/* Difficulty toggle */}
@@ -40,14 +42,14 @@ export default function ProgressiveMode({ onNavigate }: Props) {
           className={`flex-1 h-11 rounded-xl text-base font-black transition-all
             ${difficulty === 'easy' ? 'bg-teal-400 text-white shadow' : 'text-teal-600'}`}
         >
-          ⭐ Fácil
+          {t.progressiveMode.easy}
         </button>
         <button
           onClick={() => setDifficulty('hard')}
           className={`flex-1 h-11 rounded-xl text-base font-black transition-all
             ${difficulty === 'hard' ? 'bg-rose-500 text-white shadow' : 'text-rose-600'}`}
         >
-          🔥 Difícil
+          {t.progressiveMode.hard}
         </button>
       </div>
 

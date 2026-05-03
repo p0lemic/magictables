@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { User } from '../types'
-import UnicornAvatar from '../components/UnicornAvatar'
+import { useTranslation } from '../i18n'
+import CreatureAvatar from '../components/CreatureAvatar'
 import StarParticles from '../components/StarParticles'
 
 interface Props {
@@ -12,9 +13,10 @@ interface Props {
 interface PinPadProps {
   onComplete: (pin: string) => void
   error: boolean
+  errorLabel: string
 }
 
-function PinPad({ onComplete, error }: PinPadProps) {
+function PinPad({ onComplete, error, errorLabel }: PinPadProps) {
   const [digits, setDigits] = useState('')
 
   useEffect(() => {
@@ -47,7 +49,7 @@ function PinPad({ onComplete, error }: PinPadProps) {
       </div>
 
       {error && (
-        <p className="text-sm font-bold text-red-500">PIN incorrecto</p>
+        <p className="text-sm font-bold text-red-500">{errorLabel}</p>
       )}
 
       {/* Number grid */}
@@ -92,6 +94,7 @@ type Modal =
   | { type: 'confirm-delete'; userId: number; name: string }
 
 export default function UserSelect({ onLogin }: Props) {
+  const { t, toggle } = useTranslation()
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState<Modal>({ type: 'none' })
@@ -100,6 +103,7 @@ export default function UserSelect({ onLogin }: Props) {
 
   // Create-form state
   const [newName, setNewName] = useState('')
+  const [newCreature, setNewCreature] = useState<'unicorn' | 'dragon'>('unicorn')
   const [usePin, setUsePin] = useState(false)
   const [newPin, setNewPin] = useState('')
   const [createError, setCreateError] = useState('')
@@ -159,7 +163,7 @@ export default function UserSelect({ onLogin }: Props) {
     const name = newName.trim()
     if (!name) return
     if (usePin && newPin.length !== 4) {
-      setCreateError('El PIN debe tener 4 dígitos')
+      setCreateError(t.userSelect.pinLengthError)
       return
     }
 
@@ -167,21 +171,22 @@ export default function UserSelect({ onLogin }: Props) {
       const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, pin: usePin ? newPin : undefined }),
+        body: JSON.stringify({ name, pin: usePin ? newPin : undefined, creature: newCreature }),
       })
       const data = await res.json()
       if (!res.ok) {
-        setCreateError(data.error === 'name taken' ? 'Ese nombre ya existe' : 'Error al crear')
+        setCreateError(data.error === 'name taken' ? t.userSelect.nameTakenError : t.userSelect.createError)
         return
       }
       await loginAs(data.id)
     } catch {
-      setCreateError('No se puede conectar con el servidor')
+      setCreateError(t.userSelect.connectError)
     }
   }
 
   function openCreate() {
     setNewName('')
+    setNewCreature('unicorn')
     setUsePin(false)
     setNewPin('')
     setCreateError('')
@@ -191,7 +196,7 @@ export default function UserSelect({ onLogin }: Props) {
   if (loggingIn) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-magic-lavender to-magic-rose flex items-center justify-center font-nunito">
-        <p className="text-2xl font-black text-magic-purple animate-pulse">Cargando...</p>
+        <p className="text-2xl font-black text-magic-purple animate-pulse">{t.userSelect.loading}</p>
       </div>
     )
   }
@@ -201,18 +206,27 @@ export default function UserSelect({ onLogin }: Props) {
       <StarParticles />
 
       {/* Title */}
-      <div className="relative z-10 text-center pt-6">
-        <h1 className="text-4xl font-black text-magic-purple">¿Quién juega?</h1>
-        <p className="text-lg font-bold text-pink-500 mt-1">🦄 Elige tu jugador</p>
+      <div className="relative z-10 w-full max-w-md flex items-start justify-between pt-6">
+        <div className="text-center flex-1">
+          <h1 className="text-4xl font-black text-magic-purple">{t.userSelect.title}</h1>
+          <p className="text-lg font-bold text-pink-500 mt-1">{t.userSelect.subtitle}</p>
+        </div>
+        <button
+          onClick={toggle}
+          className="shrink-0 px-3 py-2 bg-white/70 rounded-xl border border-magic-purple/30
+            text-xs font-bold text-magic-purple/70 active:scale-95 transition-all shadow-sm"
+        >
+          {t.langToggleLabel}
+        </button>
       </div>
 
       {/* User grid */}
       <div className="relative z-10 w-full max-w-md">
         {loading ? (
-          <p className="text-center text-magic-purple font-bold animate-pulse">Cargando...</p>
+          <p className="text-center text-magic-purple font-bold animate-pulse">{t.userSelect.loading}</p>
         ) : users.length === 0 ? (
           <p className="text-center text-magic-purple/60 font-bold py-8">
-            Aún no hay jugadores. ¡Crea el primero!
+            {t.userSelect.noPlayers}
           </p>
         ) : (
           <div className="grid grid-cols-2 gap-4">
@@ -224,7 +238,7 @@ export default function UserSelect({ onLogin }: Props) {
                     flex flex-col items-center gap-2 shadow-md
                     active:scale-95 active:border-b-2 transition-all"
                 >
-                  <UnicornAvatar equipped={user.equipped} size={70} />
+                  <CreatureAvatar state={{ creature: user.creature, equipped: user.equipped, dragonEquipped: user.dragonEquipped, unlockedAccessories: [], unlockedColors: [], dragonUnlockedAccessories: [], dragonUnlockedColors: [] }} size={70} />
                   <span className="font-black text-magic-purple text-base leading-tight text-center">
                     {user.name}
                   </span>
@@ -232,9 +246,10 @@ export default function UserSelect({ onLogin }: Props) {
                     <span className="text-amber-500">★ {user.totalStars}/30</span>
                     <span className="text-blue-400">★ {user.totalHardStars}/30</span>
                   </div>
-                  {user.hasPin && (
-                    <span className="text-xs text-gray-400 font-bold">🔒 PIN</span>
-                  )}
+                  {user.hasPin
+                    ? <span className="text-xs text-gray-400 font-bold">🔒 PIN</span>
+                    : <span className="text-xs opacity-0 select-none">🔒 PIN</span>
+                  }
                 </button>
                 {/* Delete button */}
                 <button
@@ -258,7 +273,7 @@ export default function UserSelect({ onLogin }: Props) {
           border-2 border-b-4 border-magic-purple text-xl font-black shadow
           active:scale-95 active:border-b-2 transition-all"
       >
-        ＋ Nuevo jugador
+        {t.userSelect.newPlayerBtn}
       </button>
 
       {/* ── PIN modal ──────────────────────────────────────────────────── */}
@@ -266,15 +281,15 @@ export default function UserSelect({ onLogin }: Props) {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xs flex flex-col items-center gap-4 shadow-2xl border-2 border-magic-purple">
             <p className="text-xl font-black text-magic-purple">
-              Hola, {modal.name} 👋
+              {t.userSelect.pinTitle({ name: modal.name })}
             </p>
-            <p className="text-sm font-bold text-gray-500">Introduce tu PIN</p>
-            <PinPad onComplete={handlePin} error={pinError} />
+            <p className="text-sm font-bold text-gray-500">{t.userSelect.enterPin}</p>
+            <PinPad onComplete={handlePin} error={pinError} errorLabel={t.userSelect.wrongPin} />
             <button
               onClick={() => setModal({ type: 'none' })}
               className="mt-2 text-sm font-bold text-gray-400 active:text-gray-600"
             >
-              Cancelar
+              {t.userSelect.cancel}
             </button>
           </div>
         </div>
@@ -285,17 +300,17 @@ export default function UserSelect({ onLogin }: Props) {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xs flex flex-col items-center gap-4 shadow-2xl border-2 border-red-300">
             <p className="text-xl font-black text-gray-700 text-center">
-              Borrar a {modal.name}
+              {t.userSelect.deleteTitle({ name: modal.name })}
             </p>
             <p className="text-sm text-gray-500 text-center">
-              Introduce el PIN para confirmar
+              {t.userSelect.enterPin}
             </p>
-            <PinPad onComplete={handlePin} error={pinError} />
+            <PinPad onComplete={handlePin} error={pinError} errorLabel={t.userSelect.wrongPin} />
             <button
               onClick={() => setModal({ type: 'none' })}
               className="text-sm font-bold text-gray-400 active:text-gray-600"
             >
-              Cancelar
+              {t.userSelect.cancel}
             </button>
           </div>
         </div>
@@ -306,23 +321,23 @@ export default function UserSelect({ onLogin }: Props) {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xs flex flex-col items-center gap-4 shadow-2xl border-2 border-red-300">
             <p className="text-xl font-black text-gray-700 text-center">
-              ¿Borrar a {modal.name}?
+              {t.userSelect.deleteConfirm({ name: modal.name })}
             </p>
             <p className="text-sm text-gray-500 text-center">
-              Se borrará todo su progreso y no se puede deshacer.
+              {t.userSelect.deletePermanent}
             </p>
             <button
               onClick={() => deleteUser(modal.userId)}
               className="w-full h-12 bg-red-500 text-white rounded-2xl border-b-4 border-red-700
                 font-black text-lg active:scale-95 active:border-b-2 transition-all"
             >
-              Sí, borrar
+              {t.userSelect.deleteBtn}
             </button>
             <button
               onClick={() => setModal({ type: 'none' })}
               className="text-sm font-bold text-gray-400 active:text-gray-600"
             >
-              Cancelar
+              {t.userSelect.cancel}
             </button>
           </div>
         </div>
@@ -333,13 +348,34 @@ export default function UserSelect({ onLogin }: Props) {
         <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-6">
           <div className="bg-white rounded-3xl p-6 w-full max-w-xs flex flex-col gap-4 shadow-2xl border-2 border-magic-purple">
             <p className="text-xl font-black text-magic-purple text-center">
-              Nuevo jugador 🦄
+              {t.userSelect.newPlayerModalTitle}
             </p>
 
             <form onSubmit={handleCreate} className="flex flex-col gap-3">
+              {/* Creature picker */}
+              <p className="text-sm font-bold text-gray-500 text-center">{t.userSelect.chooseCreature}</p>
+              <div className="grid grid-cols-2 gap-2">
+                {(['unicorn', 'dragon'] as const).map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setNewCreature(c)}
+                    className={`py-4 rounded-2xl border-2 border-b-4 font-black text-lg transition-all active:scale-95
+                      ${newCreature === c
+                        ? c === 'unicorn'
+                          ? 'bg-magic-purple text-white border-purple-800'
+                          : 'bg-emerald-500 text-white border-emerald-700'
+                        : 'bg-white text-gray-400 border-gray-200 border-b-4'
+                      }`}
+                  >
+                    {c === 'unicorn' ? t.userSelect.unicornChoice : t.userSelect.dragonChoice}
+                  </button>
+                ))}
+              </div>
+
               <input
                 type="text"
-                placeholder="Tu nombre"
+                placeholder={t.userSelect.namePlaceholder}
                 value={newName}
                 onChange={e => setNewName(e.target.value)}
                 maxLength={20}
@@ -356,7 +392,7 @@ export default function UserSelect({ onLogin }: Props) {
                   onChange={e => setUsePin(e.target.checked)}
                   className="w-5 h-5 accent-purple-500"
                 />
-                <span className="font-bold text-gray-600">Añadir PIN (opcional)</span>
+                <span className="font-bold text-gray-600">{t.userSelect.addPin}</span>
               </label>
 
               {usePin && (
@@ -364,7 +400,7 @@ export default function UserSelect({ onLogin }: Props) {
                   type="text"
                   inputMode="numeric"
                   pattern="[0-9]*"
-                  placeholder="PIN de 4 dígitos"
+                  placeholder={t.userSelect.pinPlaceholder}
                   value={newPin}
                   onChange={e => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 4))}
                   maxLength={4}
@@ -383,7 +419,7 @@ export default function UserSelect({ onLogin }: Props) {
                 className="h-14 bg-magic-purple text-white rounded-2xl border-b-4 border-purple-800
                   text-lg font-black active:scale-95 active:border-b-2 transition-all shadow"
               >
-                ¡Jugar!
+                {t.userSelect.playBtn}
               </button>
 
               <button
@@ -391,7 +427,7 @@ export default function UserSelect({ onLogin }: Props) {
                 onClick={() => setModal({ type: 'none' })}
                 className="text-sm font-bold text-gray-400 active:text-gray-600"
               >
-                Cancelar
+                {t.userSelect.cancel}
               </button>
             </form>
           </div>

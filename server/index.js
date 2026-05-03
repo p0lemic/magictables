@@ -63,6 +63,27 @@ const DEFAULT_EQUIPPED = {
   bodyColor: 'white', maneColor: 'lavender',
 }
 
+const DEFAULT_DRAGON_EQUIPPED = {
+  horns: null, wings: null, back: null,
+  scaleColor: 'forest-green', bellyColor: 'silver-scales',
+}
+
+function buildInitialState(creature) {
+  const tables = Object.fromEntries(
+    Array.from({ length: 10 }, (_, i) => [i + 1, { stars: 0, masteryPercent: 0, totalAttempts: 0, totalCorrect: 0, hardStars: 0 }])
+  )
+  const unicorn = {
+    creature: creature === 'dragon' ? 'dragon' : 'unicorn',
+    unlockedAccessories: [],
+    unlockedColors: [],
+    equipped: { ...DEFAULT_EQUIPPED },
+    dragonUnlockedAccessories: [],
+    dragonEquipped: { ...DEFAULT_DRAGON_EQUIPPED },
+    dragonUnlockedColors: [],
+  }
+  return { tables, unicorn }
+}
+
 app.get('/api/users', (_req, res) => {
   const users = db.prepare('SELECT id, name, pin FROM users ORDER BY id').all()
 
@@ -70,24 +91,28 @@ app.get('/api/users', (_req, res) => {
     const row = db.prepare('SELECT data FROM user_state WHERE user_id = ?').get(u.id)
     let totalStars = 0
     let totalHardStars = 0
+    let creature = 'unicorn'
     let equipped = { ...DEFAULT_EQUIPPED }
+    let dragonEquipped = { horns: null, wings: null, back: null, scaleColor: 'forest-green', bellyColor: 'silver-scales' }
     if (row) {
       try {
         const state = JSON.parse(row.data)
         const tables = Object.values(state.tables ?? {})
         totalStars = tables.reduce((sum, t) => sum + (t.stars ?? 0), 0)
         totalHardStars = tables.reduce((sum, t) => sum + (t.hardStars ?? 0), 0)
+        creature = state.unicorn?.creature ?? 'unicorn'
         equipped = state.unicorn?.equipped ?? equipped
+        dragonEquipped = state.unicorn?.dragonEquipped ?? dragonEquipped
       } catch { /* ignore corrupt state */ }
     }
-    return { id: u.id, name: u.name, hasPin: !!u.pin, totalStars, totalHardStars, equipped }
+    return { id: u.id, name: u.name, hasPin: !!u.pin, totalStars, totalHardStars, creature, equipped, dragonEquipped }
   })
 
   res.json(result)
 })
 
 app.post('/api/users', (req, res) => {
-  const { name, pin } = req.body ?? {}
+  const { name, pin, creature } = req.body ?? {}
   if (!name?.trim()) return res.status(400).json({ error: 'name required' })
 
   const existing = db.prepare('SELECT id FROM users WHERE name = ?').get(name.trim())
@@ -97,7 +122,11 @@ app.post('/api/users', (req, res) => {
     'INSERT INTO users (name, pin) VALUES (?, ?)'
   ).run(name.trim(), pin || null)
 
-  res.json({ id: Number(lastInsertRowid), name: name.trim() })
+  const userId = Number(lastInsertRowid)
+  const initialState = buildInitialState(creature)
+  db.prepare('INSERT INTO user_state (user_id, data) VALUES (?, ?)').run(userId, JSON.stringify(initialState))
+
+  res.json({ id: userId, name: name.trim() })
 })
 
 app.post('/api/users/:id/login', (req, res) => {

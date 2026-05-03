@@ -1,4 +1,4 @@
-import type { AccessoryId, SessionQuestion, TableProgress, UnicornColor } from '../types'
+import type { AccessoryId, DragonAccessoryId, DragonColor, SessionQuestion, TableProgress, UnicornColor } from '../types'
 
 /** Calculate stars from a session score (correct out of 10). */
 export function calculateStars(correct: number): number {
@@ -63,6 +63,59 @@ export function computeUnlockedColors(totalHardStars: number): UnicornColor[] {
   if (totalHardStars >= 22) unlocked.push('magic-purple')
   if (totalHardStars >= 28) unlocked.push('ocean')
   if (totalHardStars >= 30) unlocked.push('rainbow')
+  return unlocked
+}
+
+/** Compute which dragon accessories should be unlocked — mirrors unicorn thresholds. */
+export function computeUnlockedDragonAccessories(
+  tables: Record<number, TableProgress>,
+  totalHardStars = 0
+): DragonAccessoryId[] {
+  const list = Object.values(tables)
+  const withOneStarOrMore = list.filter(t => t.stars >= 1).length
+  const withTwoStarsOrMore = list.filter(t => t.stars >= 2).length
+  const withThreeStars = list.filter(t => t.stars >= 3).length
+  const anyThreeStars = withThreeStars >= 1
+
+  const unlocked: DragonAccessoryId[] = []
+
+  // Easy mode accessories (mirror unicorn thresholds)
+  if (withOneStarOrMore >= 1)  unlocked.push('dragon-spike-horns')
+  if (withOneStarOrMore >= 2)  unlocked.push('dragon-gem-horns')
+  if (withOneStarOrMore >= 3)  unlocked.push('dragon-crystal-wings')
+  if (withOneStarOrMore >= 5)  unlocked.push('dragon-back-spikes')
+  if (withOneStarOrMore >= 7)  unlocked.push('dragon-gold-collar')
+  if (withOneStarOrMore >= 10) unlocked.push('dragon-bat-wings')
+  if (anyThreeStars)           unlocked.push('dragon-flower-horns')
+  if (withTwoStarsOrMore >= 3) unlocked.push('dragon-star-back')
+  if (withTwoStarsOrMore >= 5) unlocked.push('dragon-wave-wings')
+  if (withTwoStarsOrMore >= 7) unlocked.push('dragon-gem-back')
+  if (withTwoStarsOrMore >= 10) unlocked.push('dragon-royal-horns')
+  if (withThreeStars >= 3)     unlocked.push('dragon-feather-wings')
+  if (withThreeStars >= 7)     unlocked.push('dragon-sparkle-back')
+  if (withThreeStars >= 10)    unlocked.push('dragon-gem-crown')
+
+  // Hard mode accessories
+  if (totalHardStars >= 1)  unlocked.push('dragon-flame-horns')
+  if (totalHardStars >= 3)  unlocked.push('dragon-ice-wings')
+  if (totalHardStars >= 8)  unlocked.push('dragon-thunder-back')
+  if (totalHardStars >= 12) unlocked.push('dragon-galaxy-wings')
+  if (totalHardStars >= 15) unlocked.push('dragon-cosmic-horns')
+  if (totalHardStars >= 20) unlocked.push('dragon-lava-back')
+  if (totalHardStars >= 25) unlocked.push('dragon-shadow-wings')
+
+  return unlocked
+}
+
+/** Compute which dragon colors should be unlocked — mirrors unicorn color thresholds. */
+export function computeUnlockedDragonColors(totalHardStars: number): DragonColor[] {
+  const unlocked: DragonColor[] = []
+  if (totalHardStars >= 5)  unlocked.push('ice-white')
+  if (totalHardStars >= 10) unlocked.push('gold-scales')
+  if (totalHardStars >= 18) unlocked.push('lava-orange')
+  if (totalHardStars >= 22) unlocked.push('cosmic-violet')
+  if (totalHardStars >= 28) unlocked.push('rainbow-scales')
+  if (totalHardStars >= 30) unlocked.push('shadow-black')
   return unlocked
 }
 

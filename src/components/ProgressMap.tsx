@@ -1,4 +1,5 @@
 import type { TableProgress } from '../types'
+import { useTranslation } from '../i18n'
 import StarRating from './StarRating'
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export default function ProgressMap({ tables, isUnlocked, onSelectTable }: Props) {
+  const { t } = useTranslation()
+
   return (
     <div className="flex flex-col items-center gap-3 w-full px-4">
       {Array.from({ length: 10 }, (_, i) => {
@@ -38,7 +41,7 @@ export default function ProgressMap({ tables, isUnlocked, onSelectTable }: Props
             {/* Label + stars */}
             <div className="flex flex-col items-start gap-1">
               <span className="font-bold text-lg text-gray-700">
-                Tabla del {n}
+                {t.progressMap.table({ n })}
               </span>
               {unlocked && (
                 <StarRating stars={progress?.stars ?? 0} size="sm" />

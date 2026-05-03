@@ -18,6 +18,8 @@ export default function UnicornAvatar({ equipped, size = 200, floating = false }
   function hornFill() {
     if (hornId === 'rainbow-horn')  return 'url(#rainbowGrad)'
     if (hornId === 'crystal-horn')  return 'url(#crystalGrad)'
+    if (hornId === 'flame-horn')    return 'url(#flameGrad)'
+    if (hornId === 'cosmic-horn')   return 'url(#cosmicGrad)'
     if (hornId === 'star-bow')      return '#fee440'
     if (hornId === 'glitter-sparkle') return '#FFD700'
     return '#fee440'
@@ -28,31 +30,52 @@ export default function UnicornAvatar({ equipped, size = 200, floating = false }
   const mane2 = capeId === 'rainbow-mane' ? 'url(#maneRainbow)' : maneColor
 
   // ── Wings (behind body) ───────────────────────────────────────────────────
+  // Wings anchor at (136, 105) — upper-back of the body
   function renderWings() {
     if (wingsId === 'golden-wings') return (
       <>
-        <ellipse cx="165" cy="110" rx="30" ry="18"
-          fill="#FFD700" opacity="0.85" transform="rotate(-20 165 110)" />
-        <ellipse cx="170" cy="125" rx="25" ry="14"
-          fill="#FFE55C" opacity="0.75" transform="rotate(-10 170 125)" />
+        <ellipse cx="136" cy="102" rx="30" ry="18"
+          fill="#FFD700" opacity="0.85" transform="rotate(-20 136 102)" />
+        <ellipse cx="141" cy="117" rx="25" ry="14"
+          fill="#FFE55C" opacity="0.75" transform="rotate(-10 141 117)" />
       </>
     )
     if (wingsId === 'fairy-wings') return (
       <>
-        <ellipse cx="162" cy="105" rx="22" ry="14"
-          fill="#f0abff" opacity="0.70" transform="rotate(-25 162 105)" />
-        <ellipse cx="166" cy="122" rx="18" ry="10"
-          fill="#e879f9" opacity="0.55" transform="rotate(-10 166 122)" />
+        <ellipse cx="133" cy="97" rx="22" ry="14"
+          fill="#f0abff" opacity="0.70" transform="rotate(-25 133 97)" />
+        <ellipse cx="137" cy="114" rx="18" ry="10"
+          fill="#e879f9" opacity="0.55" transform="rotate(-10 137 114)" />
       </>
     )
     if (wingsId === 'phoenix-wings') return (
       <>
-        <ellipse cx="165" cy="100" rx="34" ry="20"
-          fill="#ff6b2b" opacity="0.88" transform="rotate(-22 165 100)" />
-        <ellipse cx="170" cy="118" rx="28" ry="16"
-          fill="#ff9e2b" opacity="0.75" transform="rotate(-10 170 118)" />
-        <ellipse cx="168" cy="132" rx="20" ry="10"
-          fill="#ffd93d" opacity="0.65" transform="rotate(0 168 132)" />
+        <ellipse cx="136" cy="94" rx="34" ry="20"
+          fill="#ff6b2b" opacity="0.88" transform="rotate(-22 136 94)" />
+        <ellipse cx="141" cy="112" rx="28" ry="16"
+          fill="#ff9e2b" opacity="0.75" transform="rotate(-10 141 112)" />
+        <ellipse cx="139" cy="126" rx="20" ry="10"
+          fill="#ffd93d" opacity="0.65" transform="rotate(0 139 126)" />
+      </>
+    )
+    if (wingsId === 'dragon-wings') return (
+      <>
+        <ellipse cx="136" cy="94" rx="36" ry="22"
+          fill="#2d6a4f" opacity="0.90" transform="rotate(-28 136 94)" />
+        <ellipse cx="141" cy="112" rx="28" ry="14"
+          fill="#1b4332" opacity="0.80" transform="rotate(-12 141 112)" />
+        <line x1="118" y1="100" x2="136" y2="90" stroke="#52b788" strokeWidth="2" opacity="0.6" />
+        <line x1="122" y1="112" x2="140" y2="104" stroke="#52b788" strokeWidth="1.5" opacity="0.5" />
+      </>
+    )
+    if (wingsId === 'thunder-wings') return (
+      <>
+        <ellipse cx="136" cy="98" rx="32" ry="19"
+          fill="#ffd000" opacity="0.88" transform="rotate(-22 136 98)" />
+        <ellipse cx="140" cy="114" rx="25" ry="13"
+          fill="#ffb700" opacity="0.75" transform="rotate(-8 140 114)" />
+        <text x="122" y="100" fontSize="16" opacity="0.95">⚡</text>
+        <text x="135" y="115" fontSize="11" opacity="0.80">⚡</text>
       </>
     )
     return null
@@ -62,6 +85,22 @@ export default function UnicornAvatar({ equipped, size = 200, floating = false }
   function renderCapeBack() {
     if (capeId === 'magic-cape') return (
       <ellipse cx="115" cy="148" rx="65" ry="30" fill="#c77dff" opacity="0.7" />
+    )
+    if (capeId === 'galaxy-cape') return (
+      <>
+        <defs>
+          <linearGradient id="galaxyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%"   stopColor="#1a0533" />
+            <stop offset="40%"  stopColor="#4a1a7a" />
+            <stop offset="100%" stopColor="#0d1b4b" />
+          </linearGradient>
+        </defs>
+        <ellipse cx="115" cy="148" rx="68" ry="32" fill="url(#galaxyGrad)" opacity="0.85" />
+        <text x="80"  y="148" fontSize="8" opacity="0.8">⭐</text>
+        <text x="110" y="142" fontSize="6" opacity="0.7">✨</text>
+        <text x="130" y="152" fontSize="8" opacity="0.8">💫</text>
+        <text x="150" y="143" fontSize="6" opacity="0.6">⭐</text>
+      </>
     )
     return null
   }
@@ -86,11 +125,27 @@ export default function UnicornAvatar({ equipped, size = 200, floating = false }
         <text x="72" y="66" fontSize="10" opacity="0.8">✨</text>
       </>
     )
+    if (hornId === 'star-tiara') return (
+      <>
+        <text x="35" y="60" fontSize="13">⭐</text>
+        <text x="54" y="52" fontSize="17">⭐</text>
+        <text x="72" y="60" fontSize="13">⭐</text>
+        <text x="46" y="68" fontSize="9" opacity="0.7">✨</text>
+      </>
+    )
+    if (hornId === 'ice-crown') return (
+      <>
+        <text x="36" y="60" fontSize="14">❄️</text>
+        <text x="55" y="52" fontSize="18">👑</text>
+        <text x="74" y="60" fontSize="12">❄️</text>
+        <text x="46" y="70" fontSize="9" opacity="0.7">💙</text>
+      </>
+    )
 
     // Horn polygon + per-accessory extras
     return (
       <>
-        {(hornId === 'rainbow-horn' || hornId === 'crystal-horn') && (
+        {(hornId === 'rainbow-horn' || hornId === 'crystal-horn' || hornId === 'flame-horn' || hornId === 'cosmic-horn') && (
           <defs>
             {hornId === 'rainbow-horn' && (
               <linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -106,6 +161,20 @@ export default function UnicornAvatar({ equipped, size = 200, floating = false }
                 <stop offset="0%"   stopColor="#e0f7ff" />
                 <stop offset="50%"  stopColor="#a8d8f0" />
                 <stop offset="100%" stopColor="#7ec8e3" />
+              </linearGradient>
+            )}
+            {hornId === 'flame-horn' && (
+              <linearGradient id="flameGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+                <stop offset="0%"   stopColor="#ff4500" />
+                <stop offset="50%"  stopColor="#ff8c00" />
+                <stop offset="100%" stopColor="#ffd700" />
+              </linearGradient>
+            )}
+            {hornId === 'cosmic-horn' && (
+              <linearGradient id="cosmicGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%"   stopColor="#6a0dad" />
+                <stop offset="50%"  stopColor="#4d96ff" />
+                <stop offset="100%" stopColor="#c77dff" />
               </linearGradient>
             )}
           </defs>
@@ -146,6 +215,21 @@ export default function UnicornAvatar({ equipped, size = 200, floating = false }
             <text x="20" y="50" fontSize="8"  opacity="0.7">✨</text>
             <text x="150" y="80" fontSize="10" opacity="0.6">💫</text>
             <text x="140" y="50" fontSize="8"  opacity="0.5">✨</text>
+          </>
+        )}
+        {hornId === 'flame-horn' && (
+          <>
+            <text x="38" y="22" fontSize="13" opacity="0.95">🔥</text>
+            <text x="62" y="16" fontSize="10" opacity="0.8">🔥</text>
+            <text x="26" y="42" fontSize="9"  opacity="0.7">🔥</text>
+          </>
+        )}
+        {hornId === 'cosmic-horn' && (
+          <>
+            <text x="34" y="20" fontSize="11" opacity="0.9">💫</text>
+            <text x="66" y="16" fontSize="9"  opacity="0.8">⭐</text>
+            <text x="82" y="30" fontSize="9"  opacity="0.7">✨</text>
+            <text x="22" y="44" fontSize="8"  opacity="0.7">🌟</text>
           </>
         )}
       </>

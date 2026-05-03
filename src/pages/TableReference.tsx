@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Screen } from '../types'
+import { useTranslation } from '../i18n'
 import StarParticles from '../components/StarParticles'
 
 interface Props {
@@ -33,6 +34,7 @@ const ROW_COLORS: Record<number, string> = {
 }
 
 export default function TableReference({ onNavigate }: Props) {
+  const { t } = useTranslation()
   const [selected, setSelected] = useState<number>(1)
 
   return (
@@ -48,12 +50,12 @@ export default function TableReference({ onNavigate }: Props) {
         >
           ←
         </button>
-        <h2 className="text-3xl font-black text-magic-purple">Ver tablas</h2>
+        <h2 className="text-3xl font-black text-magic-purple">{t.tableReference.title}</h2>
       </div>
 
       {/* Table selector */}
       <div className="relative z-10 w-full max-w-md">
-        <p className="text-sm font-bold text-magic-purple/70 mb-2 text-center">Elige una tabla</p>
+        <p className="text-sm font-bold text-magic-purple/70 mb-2 text-center">{t.tableReference.selectTable}</p>
         <div className="grid grid-cols-5 gap-2">
           {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
             <button
@@ -76,7 +78,7 @@ export default function TableReference({ onNavigate }: Props) {
       <div className="relative z-10 w-full max-w-md">
         {/* Title */}
         <div className={`rounded-2xl border-2 p-3 mb-3 text-center ${TABLE_COLORS[selected]}`}>
-          <span className="text-2xl font-black">Tabla del {selected}</span>
+          <span className="text-2xl font-black">{t.tableReference.table({ n: selected })}</span>
         </div>
 
         {/* Rows */}
@@ -103,14 +105,14 @@ export default function TableReference({ onNavigate }: Props) {
           className="flex-1 h-16 bg-teal-400 text-white rounded-2xl border-b-4 border-teal-600
             text-lg font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
         >
-          🔢 En orden
+          {t.tableReference.ordered}
         </button>
         <button
           onClick={() => onNavigate({ name: 'practice-session', table: selected, mode: 'free' })}
           className="flex-1 h-16 bg-magic-purple text-white rounded-2xl border-b-4 border-purple-800
             text-lg font-black shadow-lg active:scale-95 active:border-b-2 transition-all"
         >
-          🔀 Aleatorio
+          {t.tableReference.random}
         </button>
       </div>
     </div>

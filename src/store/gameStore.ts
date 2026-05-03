@@ -1,6 +1,16 @@
 import { create } from 'zustand'
-import type { AccessoryId, TableProgress, UnicornColor, UnicornEquipped, UnicornState } from '../types'
-import { calculateStars, computeUnlockedAccessories, computeUnlockedColors, computeTotalHardStars } from '../utils/game'
+import type {
+  AccessoryId, CreatureType, DragonAccessoryId, DragonColor, DragonEquipped,
+  TableProgress, UnicornColor, UnicornEquipped, UnicornState
+} from '../types'
+import {
+  calculateStars,
+  computeUnlockedAccessories,
+  computeUnlockedColors,
+  computeTotalHardStars,
+  computeUnlockedDragonAccessories,
+  computeUnlockedDragonColors,
+} from '../utils/game'
 
 interface GameStore {
   tables: Record<number, TableProgress>
@@ -14,8 +24,10 @@ interface GameStore {
     correct: number,
     mode: 'free' | 'progressive',
     difficulty?: 'easy' | 'hard'
-  ) => { accessories: AccessoryId[]; colors: UnicornColor[] }
+  ) => { accessories: AccessoryId[]; colors: UnicornColor[]; dragonAccessories: DragonAccessoryId[]; dragonColors: DragonColor[] }
   equipAccessory: (slot: keyof UnicornEquipped, value: string) => void
+  equipDragonAccessory: (slot: keyof DragonEquipped, value: string) => void
+  switchCreature: (type: CreatureType) => void
 }
 
 const DEFAULT_TABLE: TableProgress = {
@@ -32,7 +44,16 @@ function defaultTables(): Record<number, TableProgress> {
   )
 }
 
+const DEFAULT_DRAGON_EQUIPPED: DragonEquipped = {
+  horns: null,
+  wings: null,
+  back: null,
+  scaleColor: 'forest-green',
+  bellyColor: 'silver-scales',
+}
+
 const DEFAULT_UNICORN: UnicornState = {
+  creature: 'unicorn',
   unlockedAccessories: [],
   unlockedColors: [],
   equipped: {
@@ -42,12 +63,19 @@ const DEFAULT_UNICORN: UnicornState = {
     bodyColor: 'white' as UnicornColor,
     maneColor: 'lavender' as UnicornColor,
   },
+  dragonUnlockedAccessories: [],
+  dragonEquipped: { ...DEFAULT_DRAGON_EQUIPPED },
+  dragonUnlockedColors: [],
 }
 
 function freshState() {
   return {
     tables: defaultTables(),
-    unicorn: { ...DEFAULT_UNICORN, equipped: { ...DEFAULT_UNICORN.equipped } },
+    unicorn: {
+      ...DEFAULT_UNICORN,
+      equipped: { ...DEFAULT_UNICORN.equipped },
+      dragonEquipped: { ...DEFAULT_DRAGON_EQUIPPED },
+    },
     loaded: false,
     userId: null as number | null,
   }
@@ -83,6 +111,17 @@ export const useGameStore = create<GameStore>()((set, get) => ({
               data.tables[key].hardStars = 0
             }
           }
+          // Migrate: ensure dragon fields exist for old saves
+          if (!data.unicorn.creature) data.unicorn.creature = 'unicorn'
+          if (!data.unicorn.dragonEquipped) data.unicorn.dragonEquipped = { ...DEFAULT_DRAGON_EQUIPPED }
+          // Always recompute dragon unlocks — they're derived from tables, never user choices
+          {
+            const totalHardStars = Object.values(data.tables as Record<number, { hardStars?: number }>)
+              .reduce((sum, t) => sum + (t.hardStars ?? 0), 0)
+            data.unicorn.dragonUnlockedAccessories = computeUnlockedDragonAccessories(data.tables, totalHardStars)
+            data.unicorn.dragonUnlockedColors = computeUnlockedDragonColors(totalHardStars)
+          }
+
           set({ tables: data.tables, unicorn: data.unicorn, loaded: true })
         } else {
           set({ loaded: true })
@@ -126,25 +165,40 @@ export const useGameStore = create<GameStore>()((set, get) => ({
     }
 
     const totalHardStars = computeTotalHardStars(updatedTables)
+
+    // Unicorn unlocks
     const prevUnlockedAccessories = new Set(state.unicorn.unlockedAccessories)
     const prevUnlockedColors = new Set(state.unicorn.unlockedColors)
-
     const nowUnlockedAccessories = computeUnlockedAccessories(updatedTables, totalHardStars)
     const nowUnlockedColors = computeUnlockedColors(totalHardStars)
-
     const newlyUnlockedAccessories = nowUnlockedAccessories.filter(a => !prevUnlockedAccessories.has(a))
     const newlyUnlockedColors = nowUnlockedColors.filter(c => !prevUnlockedColors.has(c))
+
+    // Dragon unlocks
+    const prevDragonAccessories = new Set(state.unicorn.dragonUnlockedAccessories)
+    const prevDragonColors = new Set(state.unicorn.dragonUnlockedColors)
+    const nowDragonAccessories = computeUnlockedDragonAccessories(updatedTables, totalHardStars)
+    const nowDragonColors = computeUnlockedDragonColors(totalHardStars)
+    const newlyDragonAccessories = nowDragonAccessories.filter(a => !prevDragonAccessories.has(a))
+    const newlyDragonColors = nowDragonColors.filter(c => !prevDragonColors.has(c))
 
     const updatedUnicorn: UnicornState = {
       ...state.unicorn,
       unlockedAccessories: nowUnlockedAccessories,
       unlockedColors: nowUnlockedColors,
+      dragonUnlockedAccessories: nowDragonAccessories,
+      dragonUnlockedColors: nowDragonColors,
     }
 
     set({ tables: updatedTables, unicorn: updatedUnicorn })
     if (state.userId) saveToApi(state.userId, updatedTables, updatedUnicorn)
 
-    return { accessories: newlyUnlockedAccessories, colors: newlyUnlockedColors }
+    return {
+      accessories: newlyUnlockedAccessories,
+      colors: newlyUnlockedColors,
+      dragonAccessories: newlyDragonAccessories,
+      dragonColors: newlyDragonColors,
+    }
   },
 
   equipAccessory(slot, value) {
@@ -153,6 +207,23 @@ export const useGameStore = create<GameStore>()((set, get) => ({
       ...state.unicorn,
       equipped: { ...state.unicorn.equipped, [slot]: value },
     }
+    set({ unicorn: updatedUnicorn })
+    if (state.userId) saveToApi(state.userId, state.tables, updatedUnicorn)
+  },
+
+  equipDragonAccessory(slot, value) {
+    const state = get()
+    const updatedUnicorn = {
+      ...state.unicorn,
+      dragonEquipped: { ...state.unicorn.dragonEquipped, [slot]: value },
+    }
+    set({ unicorn: updatedUnicorn })
+    if (state.userId) saveToApi(state.userId, state.tables, updatedUnicorn)
+  },
+
+  switchCreature(type) {
+    const state = get()
+    const updatedUnicorn = { ...state.unicorn, creature: type }
     set({ unicorn: updatedUnicorn })
     if (state.userId) saveToApi(state.userId, state.tables, updatedUnicorn)
   },

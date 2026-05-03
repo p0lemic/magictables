@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Screen, SessionQuestion } from '../types'
 import { generateSession, generateOrderedSession, generateWrongOptions } from '../utils/game'
 import { useSound } from '../hooks/useSound'
+import { useTranslation } from '../i18n'
 import MultipleChoiceInput from '../components/MultipleChoiceInput'
 import NumericKeyboard from '../components/NumericKeyboard'
 import StarParticles from '../components/StarParticles'
@@ -28,6 +29,7 @@ function shuffleOptions(correct: number): number[] {
 
 export default function PracticeSession({ table, mode, ordered = false, difficulty = 'easy', onNavigate }: Props) {
   const sound = useSound()
+  const { t } = useTranslation()
 
   const [questions] = useState<SessionQuestion[]>(() =>
     ordered ? generateOrderedSession(table) : generateSession(table)
@@ -82,7 +84,7 @@ export default function PracticeSession({ table, mode, ordered = false, difficul
         >
           ←
         </button>
-        <div className="flex-1 font-bold text-magic-purple text-lg">Tabla del {table}</div>
+        <div className="flex-1 font-bold text-magic-purple text-lg">{t.practiceSession.table({ n: table })}</div>
         <span className="font-bold text-magic-purple">{current + 1} / 10</span>
       </div>
 
@@ -106,17 +108,17 @@ export default function PracticeSession({ table, mode, ordered = false, difficul
           ${feedback === 'none'    ? 'border-magic-purple/30' : ''}
         `}
       >
-        <p className="text-2xl font-bold text-gray-500">¿Cuánto es?</p>
+        <p className="text-2xl font-bold text-gray-500">{t.practiceSession.howMuch}</p>
         <p className="text-6xl font-black text-magic-purple">
           {q.a} × {q.b} = ?
         </p>
 
         {feedback === 'correct' && (
-          <p className="text-4xl animate-bounce-in">✅ ¡Correcto!</p>
+          <p className="text-4xl animate-bounce-in">{t.practiceSession.correct}</p>
         )}
         {feedback === 'wrong' && (
           <p className="text-2xl text-red-500 font-bold">
-            ❌ Era <span className="text-3xl font-black">{q.answer}</span>
+            {t.practiceSession.wrong({ answer: q.answer })}
           </p>
         )}
       </div>
@@ -141,7 +143,7 @@ export default function PracticeSession({ table, mode, ordered = false, difficul
       {/* Score so far */}
       <div className="relative z-10 mt-auto">
         <span className="text-lg font-bold text-magic-purple/70">
-          Aciertos: {correct} / {current}
+          {t.practiceSession.score({ correct, current })}
         </span>
       </div>
     </div>
